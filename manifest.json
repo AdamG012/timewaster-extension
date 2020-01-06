@@ -7,7 +7,7 @@
   "description": "Add sites to calculate the amount of time wasted.",
   
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["backgroundTime.js"]
   },
 
   "icons": {

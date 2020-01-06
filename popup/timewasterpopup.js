@@ -81,30 +81,6 @@ function calculateTimeStandard(seconds) {
 }
 
 
-/**
- * Given the time is being counted
- * Update the timewaster html to the corresponding time
- */
-async function countTime() {
-	var seconds = 0;
-
-	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
-
-	var websites = await browser.storage.local.get(hostname);
-
-	if (!siteExists(websites, hostname)) {
-		document.getElementById("timewaster-counter").innerHTML = "Site not added";
-		return;
-	}
-
-	document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(websites[hostname]);
-
-	var timer = setInterval(async function() {
-		websites = await browser.storage.local.get(hostname);
-		document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(websites[hostname]);
-	}, 1000);
-}
-
 
 /**
  * Add the site to the browser storage
@@ -145,6 +121,25 @@ async function removeSite() {
 	location.reload();
 }
 
+async function dispTime() {
+
+	
+	var date = getDateFormat(new Date());
+
+	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+
+	var dateEntry = await browser.storage.local.get(date);
+
+	document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry[date][hostname]);
+
+
+	var timer = setInterval(async function() {
+		dateEntry = await browser.storage.local.get(date);
+		document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry[date][hostname]);
+	}, 1000);
+}
+
+
 document.getElementById("add-site").onclick = addSite;
 document.getElementById("remove-site").onclick = removeSite;
-countTime();
+dispTime();
