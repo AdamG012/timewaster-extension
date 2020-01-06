@@ -1,0 +1,29 @@
+{
+  
+  "manifest_version": 2,
+  "name": "Timewaster",
+  "version": "1.0",
+
+  "description": "Add sites to calculate the amount of time wasted.",
+  
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "icons": {
+    "48": "icons/timewastericon.png"
+  },
+
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs"
+  ],
+
+  "browser_action": {
+    "default_icon": "icons/timewastericon.png",
+    "default_title": "Timewaster",
+    "default_popup": "popup/timewaster.html"
+  }
+
+}
