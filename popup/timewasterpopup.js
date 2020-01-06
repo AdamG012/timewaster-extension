@@ -18,6 +18,43 @@ function siteExists(websites, hostname) {
 	return !(Object.keys(websites).length == 0 || websites[hostname] == null);
 }
 
+function getDateFormat(d) {
+	return zeroPad(d.getDate(),2) + zeroPad(d.getMonth() + 1, 2) + zeroPad(d.getFullYear(), 4);
+
+}
+
+class WebsiteEntry {
+
+	constructor(name) {
+		this.name = name;
+		this.time = 0;
+	}
+}
+
+class DateEntry {
+	constructor() {
+		this.websiteList = new Object();
+	}
+
+	siteExists(website) {
+		return this.websiteList[website] != null && this.websiteList[website] != undefined;
+	}
+
+	addWebsite(website) {
+		if (!siteExists(website)) {
+			this.websiteList[website] = new WebsiteEntry(name);
+		}
+	}
+
+	getWebsite(website) {
+		if (siteExists(website)) {
+			return this.websiteList[website];
+		}
+		return null;
+	}
+
+}
+
 /**
  * Pad zeros to number given the number of places
  */
@@ -49,7 +86,6 @@ function calculateTimeStandard(seconds) {
  * Update the timewaster html to the corresponding time
  */
 async function countTime() {
-
 	var seconds = 0;
 
 	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
@@ -74,22 +110,17 @@ async function countTime() {
  * Add the site to the browser storage
  */
 async function addSite() {
+
+	var date = getDateFormat(new Date());
+	
 	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
-	var websites = await browser.storage.local.get(hostname);
+	var websites = await browser.storage.local.get(date);
 
-	if (Object.keys(websites).length == 0) {
-		websites = new Object();
-	} 
-
-	if (websites[hostname] == null) {
-		websites[hostname] = 0;
+	if (websites[date] == null) {
+		websites[date] = new Object();
+		websites[date][hostname] = new Object(); 	
 	}
-
-	var sites = new Object();
-	var d = new Date();
-	sites[zeroPad(d.getDate(),2) + zeroPad(d.getMonth() + 1, 2) + zeroPad(d.getFullYear(), 4)] = new Object();
-	sites[zeroPad(d.getDate(),2) + zeroPad(d.getMonth() + 1, 2) + zeroPad(d.getFullYear(), 4)][hostname] = 0;
 
 	await browser.storage.local.set(websites);
 	location.reload();
