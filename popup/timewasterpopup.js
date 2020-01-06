@@ -139,7 +139,12 @@ async function dispTime() {
 	}, 1000);
 }
 
+async function viewStats() {
+	window.open("usage.html");
+
+}
 
 document.getElementById("add-site").onclick = addSite;
 document.getElementById("remove-site").onclick = removeSite;
+document.getElementById("view-stats").onclick = viewStats;
 dispTime();
