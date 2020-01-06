@@ -44,6 +44,7 @@ function showStats() {
 			dailyStats();
 			break;
 		default:
+			document.getElementById("site-table").innerHTML = "";
 			return;
 	}
 }
