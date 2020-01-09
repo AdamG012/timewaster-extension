@@ -107,6 +107,7 @@ async function loadChart() {
 
 }
 
+showStats();
 document.getElementById("select-value").onchange = showStats;
 loadChart();
 
