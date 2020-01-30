@@ -1,57 +1,25 @@
 function setItem() {
-	  console.log("OK");
+          console.log("OK");
 }
 
 function onGot(item) {
-	console.log(item);
+        console.log(item);
 }
 
 function onError(error) {
-	console.log(`Error: ${error}`);
+        console.log(`Error: ${error}`);
 }
 
 function logTabs(tabs) {
-	return new URL(tabs[0].url).hostname;
+        return new URL(tabs[0].url).hostname;
 }
 
 function siteExists(websites, hostname) {
-	return !(Object.keys(websites).length == 0 || websites[hostname] == null);
+        return !(Object.keys(websites).length == 0 || websites[hostname] == null);
 }
 
 function getDateFormat(d) {
-	return zeroPad(d.getDate(),2) + zeroPad(d.getMonth() + 1, 2) + zeroPad(d.getFullYear(), 4);
-
-}
-
-class WebsiteEntry {
-
-	constructor(name) {
-		this.name = name;
-		this.time = 0;
-	}
-}
-
-class DateEntry {
-	constructor() {
-		this.websiteList = new Object();
-	}
-
-	siteExists(website) {
-		return this.websiteList[website] != null && this.websiteList[website] != undefined;
-	}
-
-	addWebsite(website) {
-		if (!siteExists(website)) {
-			this.websiteList[website] = new WebsiteEntry(name);
-		}
-	}
-
-	getWebsite(website) {
-		if (siteExists(website)) {
-			return this.websiteList[website];
-		}
-		return null;
-	}
+        return zeroPad(d.getDate(),2) + zeroPad(d.getMonth() + 1, 2) + zeroPad(d.getFullYear(), 4);
 
 }
 
@@ -63,23 +31,21 @@ function zeroPad(num, places) {
   return Array(+(zero > 0 && zero)).join("0") + num;
 }
 
-
 /**
- * Calculate standard HH:MM:SS time given seconds 
+ * Calculate standard HH:MM:SS time given seconds
  */
 function calculateTimeStandard(seconds) {
-	var hours = parseInt(seconds / 3600);
-	if (hours >= 1) {
-		seconds -= hours * 3600; 
-	}
-	var min = parseInt(seconds / 60);
-	if (min >= 1) {
-		seconds -= min * 60;
-	}
+        var hours = parseInt(seconds / 3600);
+        if (hours >= 1) {
+                seconds -= hours * 3600;
+        }
+        var min = parseInt(seconds / 60);
+        if (min >= 1) {
+                seconds -= min * 60;
+        }
 
-	return zeroPad(hours, 2) + ":" + zeroPad(min, 2) + ":" + zeroPad(seconds, 2);
+        return zeroPad(hours, 2) + ":" + zeroPad(min, 2) + ":" + zeroPad(seconds, 2);
 }
-
 
 
 async function addTimeout() {
