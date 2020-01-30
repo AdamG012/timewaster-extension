@@ -82,25 +82,24 @@ function calculateTimeStandard(seconds) {
 
 
 
-/**
- * Add the site to the browser storage
- */
-async function addSite() {
+async function addTimeout() {
 
-	var date = getDateFormat(new Date());
-	
+
+
+	var currentDate = new Date();
+
+	var timeout = parseInt(document.getElementById("set-timeout").value);
+	var d = new Date(currentDate.getFullYear(),currentDate.getMonth(),currentDate.getDate(),currentDate.getHours(),timeout,currentDate.getSeconds(),0);
+
 	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
-	var websites = await browser.storage.local.get(date);
+	var hostEntry = new Object();
+	hostEntry[hostname] = new Object();
+	hostEntry[hostname]["timeout"] = timeout * 60;
 
-	if (websites[date] == null) {
-		websites[date] = new Object();
-		websites[date][hostname] = new Object(); 	
-	}
-
-	await browser.storage.local.set(websites);
-	location.reload();
-
+	await browser.storage.local.set(hostEntry);
+	
+	
 }
 
 /**
@@ -122,7 +121,6 @@ async function removeSite() {
 }
 
 async function dispTime() {
-
 	
 	var date = getDateFormat(new Date());
 
@@ -131,7 +129,6 @@ async function dispTime() {
 	var dateEntry = await browser.storage.local.get(date);
 
 	document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry[date][hostname]);
-
 
 	var timer = setInterval(async function() {
 		dateEntry = await browser.storage.local.get(date);
@@ -144,7 +141,6 @@ async function viewStats() {
 
 }
 
-document.getElementById("add-site").onclick = addSite;
-document.getElementById("remove-site").onclick = removeSite;
+document.getElementById("timeout-form").onsubmit = addTimeout;
 document.getElementById("view-stats").onclick = viewStats;
 dispTime();

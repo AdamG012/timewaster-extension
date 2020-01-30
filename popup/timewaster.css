@@ -1,7 +1,3 @@
-html, body {
-  width: 100px;
-}
-
 .hidden {
   display: none;
 }
@@ -17,4 +13,8 @@ html, body {
 .timewaster-counter {
   align: center;
   display: flex;
+}
+
+#set-timeout {
+  width: 4em
 }

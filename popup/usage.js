@@ -17,22 +17,20 @@ function zeroPad(num, places) {
  * Get values from local storage
  * Iterate through keys and load names and time
  */
-async function dailyStats() {
-	var date = getDateFormat(new Date());
+async function dailyStats(date) {
 	
 	var dateEntry = await browser.storage.local.get(date);
 	
 	var currentDate = dateEntry[date];
 
-	var tableData = "<tr><th>Website</th><th>Time</th></tr>";
+	var tableData = "<tr><th>Website</th><th>Time</th><th>Remove</th></tr>";
 
 	for (var website in currentDate) {
-		tableData += "<tr><th>" + website + "</th><th>" + currentDate[website] + "</th></tr>"; 
+		tableData += "<tr><th>" + website + "</th><th>" + currentDate[website] + "</th><th><input type=\"button\" id=\"remove-website\" value=\"X\"></input></th></tr>"; 
 	}
 
-	document.getElementById("site-table").innerHTML = tableData;
 
-	
+	document.getElementById("site-table").innerHTML = tableData;
 
 }
 
@@ -43,10 +41,13 @@ function showStats() {
 	var selected = document.getElementById("select-value").value;
 	switch (selected) {
 		case "daily":
-			dailyStats();
+			var date = getDateFormat(new Date());
+			dailyStats(date);
+			loadChart(date);
 			break;
 		default:
 			document.getElementById("site-table").innerHTML = "";
+			var ctx = document.getElementById("chart").innerHTML = "";
 			return;
 	}
 }
@@ -82,10 +83,10 @@ async function loadData(date) {
 
 }
 
-async function loadChart() {
+async function loadChart(date) {
 	var ctx = document.getElementById("chart").getContext("2d");
-	var labels = await loadLabels(getDateFormat(new Date()));
-	var dataValues = await loadData(getDateFormat(new Date()));
+	var labels = await loadLabels(date);
+	var dataValues = await loadData(date);
 	var data = {
 		labels: labels,
 		datasets: [{
@@ -107,7 +108,11 @@ async function loadChart() {
 
 }
 
+async function removeSite() {
+
+}
+
 showStats();
 document.getElementById("select-value").onchange = showStats;
-loadChart();
+//document.getElementById("remove-site").onclick = removeSite;
 
