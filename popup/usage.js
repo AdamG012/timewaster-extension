@@ -38,10 +38,9 @@ function calculateTimeStandard(seconds) {
 
 
 function createDatePicker(date) {
-	var datePicker = "<form><label for=\"start\">Enter date:</label><input type=\"date\" id=\"date-value\" name=\"date-select\" value="+getDateFormatUS(date)+" ></form>";
+	var datePicker = "<label for=\"start\">Enter date:</label><input type=\"date\" id=\"date-value\" name=\"date-select\" value="+ getDateFormatUS(date) + "></input><input type=\"button\" id=\"date-button\" value=\"Set date\"></input>";
 
 	document.getElementById('stats-display').innerHTML = datePicker;
-	document.getElementById('date-value').addEventListener("change", dailyStats);
 	dailyStats();
 }
 
@@ -51,12 +50,16 @@ function createDatePicker(date) {
  * Iterate through keys and load names and time
  */
 async function dailyStats() {
+	
+	if (document.getElementById('site-table') != null) {
+		document.getElementById('site-table').remove();
+	}
 
 	var selectedDate = convertDate(document.getElementById('date-value').value);
 	var dateEntry = await browser.storage.local.get(selectedDate);
 
 	if (dateEntry == null || Object.keys(dateEntry).length == 0) {
-		clearDatePicker();
+		clearStatsDisplay();
 		alert('Invalid Date');
 		return;
 	}
@@ -66,14 +69,25 @@ async function dailyStats() {
 	var tableData = "<table id=\"site-table\"><tr><th>Website</th><th>Time</th><th>Remove</th></tr>";
 
 	for (var website in currentDate) {
-		tableData += "<tr><th>" + website + "</th><th>" + currentDate[website] + "</th><th><input type=\"button\" id=\"remove-site\" value=\"X\"></input></th></tr>"; 
+		var websiteRemove = "remove-site-" + website;
+
+		tableData += "<tr><th>" + website + "</th><th>" + currentDate[website] + "</th><th><input type=\"button\" id=\"" + websiteRemove + "\" value=\"X\"></input></th></tr>"; 
+
 	}
 
 	tableData += "</table>";
-	
+
+
 	document.getElementById('stats-display').innerHTML += tableData;
 
-	document.getElementById('remove-site').onsubmit = removeSite;
+	document.getElementById('date-button').onclick = dailyStats;
+
+	for (var website in currentDate) {
+		var websiteRemove = "remove-site-" + website;
+
+		document.getElementById(websiteRemove).onclick = function(){removeSite(website, dateEntry, selectedDate)};
+	}
+
 
 }
 
@@ -91,7 +105,7 @@ function showStats() {
 			loadChart(getDateFormat(new Date()));
 			break;
 		default:
-			clearDatePicker();
+			clearStatsDisplay();
 			clearChart();
 			return;
 	}
@@ -105,7 +119,7 @@ function clearChart() {
 			
 }
 
-function clearDatePicker() {
+function clearStatsDisplay() {
 	document.getElementById('stats-display').innerHTML = "";
 	
 
@@ -167,8 +181,11 @@ async function loadChart(date) {
 
 }
 
-async function removeSite(site, date) {
-	
+async function removeSite(site, dateEntry, date) {
+
+	delete dateEntry[date][site];
+	await browser.storage.local.set(dateEntry);
+		
 }
 
 showStats();
