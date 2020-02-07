@@ -59,39 +59,38 @@ async function dailyStats() {
 	var dateEntry = await browser.storage.local.get(selectedDate);
 
 	if (dateEntry == null || Object.keys(dateEntry).length == 0) {
-		clearStatsDisplay();
 		alert('Invalid Date');
+		document.getElementById('date-value').value = getDateFormatUS(new Date());
+		dailyStats();
 		return;
 	}
 	
+	createTable(selectedDate, dateEntry);
+
+	document.getElementById('date-button').onclick = dailyStats;
+
+}
+
+function createTable(selectedDate, dateEntry) {
 	var currentDate = dateEntry[selectedDate];
 
-	var tableData = "<table id=\"site-table\"><tr><th>Website</th><th>Time</th><th>Remove</th></tr>";
+	var tableData = "<table class=\"websiteTable\" id=\"site-table\"><thead><tr><th>Website</th><th>Time</th><th>Remove</th></tr></thead>";
 
 	for (var website in currentDate) {
-		var websiteRemove = "remove-site-" + website;
-
-		tableData += "<tr><th>" + website + "</th><th>" + currentDate[website] + "</th><th><input type=\"button\" id=\"" + websiteRemove + "\" value=\"X\"></input></th></tr>"; 
+		tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + currentDate[website] + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>"; 
 
 	}
 
 	tableData += "</table>";
 
-
 	document.getElementById('stats-display').innerHTML += tableData;
-
-	document.getElementById('date-button').onclick = dailyStats;
-
-	for (var website in currentDate) {
-		var websiteRemove = "remove-site-" + website;
-
-		document.getElementById(websiteRemove).onclick = function(){removeSite(website, dateEntry, selectedDate)};
+	
+	for (var websiteName in currentDate) {
+		
+		let website = websiteName; 
+		document.getElementById("remove-site-" + website).addEventListener('click', function(){removeSite(website, dateEntry, selectedDate)});
 	}
-
-
 }
-
-
 
 /**
  * Gets value selected from dropdown and calls the appropriate function
@@ -160,12 +159,21 @@ async function loadChart(date) {
 	var ctx = document.getElementById("chart").getContext("2d");
 	var labels = await loadLabels(date);
 	var dataValues = await loadData(date);
+	var backgroundCol = [];
+	var hoverBGCol = [];
+	
+	for (var i = 0; i < dataValues.length; i++) {
+		backgroundCol[i] = "rgb(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ")";
+		hoverBGCol[i] = backgroundCol[i]
+
+	}
+
 	var data = {
 		labels: labels,
 		datasets: [{
 			label: 'Daily Time(s)',
-			backgroundColor: 'rgb(255, 99, 132)',
-			hoverBackgroundColor: 'rgb(230, 100, 10)',
+			backgroundColor: backgroundCol,
+			hoverBackgroundColor: hoverBGCol,
             		borderColor: 'rgb(100, 20, 0)',
 			data: dataValues
 		}]
@@ -181,10 +189,14 @@ async function loadChart(date) {
 
 }
 
+
+
 async function removeSite(site, dateEntry, date) {
 
 	delete dateEntry[date][site];
 	await browser.storage.local.set(dateEntry);
+	document.getElementById(site + "-row").innerHTML = "";
+	console.log(site);
 		
 }
 
