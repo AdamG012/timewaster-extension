@@ -90,28 +90,35 @@ async function initTab() {
 
         hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
-	hostsList = await browser.storage.local.get(hostname);
+	hostsList = await browser.storage.local.get("hosts");
 
-	if (hostsList[hostname] == undefined) {
-		hostsList[hostname] = new Object();
-		hostsList[hostname]["dateList"] = [];
-		hostsList[hostname]["dateList"].push(date);
+	if (hostsList == null || !hostsList.hasOwnProperty("hosts")) {
+		hostsList = new Object();
+		hostsList["hosts"] = new Object();
 	}
 
-	else if (hostsList[hostname]["dateList"]) {
-	
+	if (!hostsList["hosts"].hasOwnProperty(hostname)) {
+		hostsList["hosts"][hostname] = new Object();
+		hostsList["hosts"][hostname]["dateList"] = [];
+	}
+
+	if (!hostsList["hosts"][hostname]["dateList"].includes(date)) {
+		hostsList["hosts"][hostname]["dateList"].push(date);
+
 	}
 
 	await browser.storage.local.set(hostsList);
 
-	dateEntry = await browser.storage.local.get(date);
+	dateEntry = await browser.storage.local.get("dates");
 
-        if (dateEntry[date] == undefined) {
+        if (!dateEntry.hasOwnProperty("dates")) {
                 dateEntry[date] = new Object();
         }
-	if (dateEntry[date][hostname] == undefined) {
+	if (!dateEntry[date].hasOwnProperty(hostname)) {
                 dateEntry[date][hostname] = 0;
 	}
+
+	await browser.storage.local.set(dateEntry);
 }
 
 /**

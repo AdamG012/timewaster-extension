@@ -12,11 +12,13 @@ async function addTimeout() {
 
 	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
-	var hostEntry = new Object();
-	hostEntry[hostname] = new Object();
-	hostEntry[hostname]["timeout"] = timeout * 60;
+	let hostsList = await browser.storage.local.get(hostname);
 
-	await browser.storage.local.set(hostEntry);
+	let dateTimeout = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds() + timeout * 60);
+
+	hostsList[hostname]["timeout"] = dateTimeout;
+	
+	await browser.storage.local.set(hostsList);
 	
 }
 
