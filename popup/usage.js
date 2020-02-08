@@ -1,44 +1,12 @@
-function getDateFormat(d) {
-        return zeroPad(d.getDate(),2) + zeroPad(d.getMonth() + 1, 2) + zeroPad(d.getFullYear(), 4);
+import {zeroPad, getDateFormat, getDateFormatUS, convertDate, calculateTimeStandard} from '../libs/date/date_helper.js';
 
-}
-
-function getDateFormatUS(d) {
-	return zeroPad(d.getFullYear(), 4) + "-" + zeroPad(d.getMonth() + 1, 2) + "-" + zeroPad(d.getDate(), 2); 
-}
-
-function convertDate(d) {
-	var arr = d.split("-");
-	return arr[2] + arr[1] + arr[0];
-}
 
 /**
- * Pad zeros to number given the number of places
+ * Simple function to load and create html that is meant with selecting date
+ * Will need to revise a better way of adding html to pages
  */
-function zeroPad(num, places) {
-  var zero = places - num.toString().length + 1;
-  return Array(+(zero > 0 && zero)).join("0") + num;
-}
-
-/**
- * Calculate standard HH:MM:SS time given seconds
- */
-function calculateTimeStandard(seconds) {
-        var hours = parseInt(seconds / 3600);
-        if (hours >= 1) {
-                seconds -= hours * 3600;
-        }
-        var min = parseInt(seconds / 60);
-        if (min >= 1) {
-                seconds -= min * 60;
-        }
-
-        return zeroPad(hours, 2) + ":" + zeroPad(min, 2) + ":" + zeroPad(seconds, 2);
-}
-
-
 function createDatePicker(date) {
-	var datePicker = "<label for=\"start\">Enter date:</label><input type=\"date\" id=\"date-value\" name=\"date-select\" value="+ getDateFormatUS(date) + "></input><input type=\"button\" id=\"date-button\" value=\"Set date\"></input>";
+	const datePicker = "<label for=\"start\">Enter date:</label><input type=\"date\" id=\"date-value\" name=\"date-select\" value="+ getDateFormatUS(date) + "></input><input type=\"button\" id=\"date-button\" value=\"Set date\"></input>";
 
 	document.getElementById('stats-display').innerHTML = datePicker;
 	dailyStats();
@@ -55,7 +23,9 @@ async function dailyStats() {
 		document.getElementById('site-table').remove();
 	}
 
-	var selectedDate = convertDate(document.getElementById('date-value').value);
+	var dateValue = document.getElementById('date-value').value;
+
+	const selectedDate = convertDate(document.getElementById('date-value').value);
 	var dateEntry = await browser.storage.local.get(selectedDate);
 
 	if (dateEntry == null || Object.keys(dateEntry).length == 0) {
@@ -68,9 +38,17 @@ async function dailyStats() {
 	createTable(selectedDate, dateEntry);
 
 	document.getElementById('date-button').onclick = dailyStats;
+	loadChart(selectedDate);
+
+	// Set the value of the date
+	document.getElementById('date-value').value = dateValue;
 
 }
 
+/**
+ * Responsible for loading a table with times given 
+ * Also responsible for adding a button to remove each element from the table
+ */
 function createTable(selectedDate, dateEntry) {
 	var currentDate = dateEntry[selectedDate];
 
@@ -101,7 +79,6 @@ function showStats() {
 		case "daily":
 			var date = new Date();
 			createDatePicker(date);
-			loadChart(getDateFormat(new Date()));
 			break;
 		default:
 			clearStatsDisplay();
@@ -110,20 +87,29 @@ function showStats() {
 	}
 }
 
+
+/**
+ * Clear html displaying chart
+ */
 function clearChart() {
 	const canvas = document.getElementById('chart');
 	const context = canvas.getContext('2d');
 	context.clearRect(0, 0, canvas.width, canvas.height);
-	document.getElementById('chart').innerHTML = "";
-			
+	document.getElementById("chart-container").innerHTML = '&nbsp;';
+	document.getElementById("chart-container").innerHTML = '<canvas id="chart"></canvas>';
 }
 
+/**
+ * Clear html displaying stats
+ */
 function clearStatsDisplay() {
 	document.getElementById('stats-display').innerHTML = "";
-	
 
 }
 
+/**
+ * Helper function to load the labels for the chart
+ */
 async function loadLabels(date) {
 
 	var dateEntry = await browser.storage.local.get(date);
@@ -140,6 +126,9 @@ async function loadLabels(date) {
 
 }
 
+/**
+ * Helper function to load the content of each label
+ */
 async function loadData(date) {
         var dateEntry = await browser.storage.local.get(date);
 
@@ -155,25 +144,38 @@ async function loadData(date) {
 
 }
 
+/**
+ * Load random colours based on length of data
+ */
+function loadColours(length) {
+	var backgroundCol = [];
+
+	for (var i = 0; i < length; i++) {
+	   	backgroundCol[i] = "rgb(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ")";
+
+	}
+
+	return backgroundCol;
+
+}
+
+/**
+ * Loading chart given calls to Loadlabels and loadData
+ * Creates chart based on date
+ */
 async function loadChart(date) {
+	clearChart();
 	var ctx = document.getElementById("chart").getContext("2d");
 	var labels = await loadLabels(date);
 	var dataValues = await loadData(date);
-	var backgroundCol = [];
-	var hoverBGCol = [];
-	
-	for (var i = 0; i < dataValues.length; i++) {
-		backgroundCol[i] = "rgb(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ")";
-		hoverBGCol[i] = backgroundCol[i]
-
-	}
+	var colourArray = loadColours(dataValues.length);
 
 	var data = {
 		labels: labels,
 		datasets: [{
 			label: 'Daily Time(s)',
-			backgroundColor: backgroundCol,
-			hoverBackgroundColor: hoverBGCol,
+			backgroundColor: colourArray,
+			hoverBackgroundColor: colourArray,
             		borderColor: 'rgb(100, 20, 0)',
 			data: dataValues
 		}]
@@ -189,15 +191,16 @@ async function loadChart(date) {
 
 }
 
-
-
+/**
+ * Remove site from saved browser storage and update table
+ */
 async function removeSite(site, dateEntry, date) {
 
 	delete dateEntry[date][site];
 	await browser.storage.local.set(dateEntry);
 	document.getElementById(site + "-row").innerHTML = "";
-	console.log(site);
-		
+	clearChart();
+	loadChart(date);
 }
 
 showStats();

@@ -35,7 +35,6 @@ function getDateFormat(d) {
 }
 
 
-
 class WebsiteEntry {
 
         constructor(name) {
@@ -91,6 +90,20 @@ async function initTab() {
 
         hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
+	hostsList = await browser.storage.local.get(hostname);
+
+	if (hostsList[hostname] == undefined) {
+		hostsList[hostname] = new Object();
+		hostsList[hostname]["dateList"] = [];
+		hostsList[hostname]["dateList"].push(date);
+	}
+
+	else if (hostsList[hostname]["dateList"]) {
+	
+	}
+
+	await browser.storage.local.set(hostsList);
+
 	dateEntry = await browser.storage.local.get(date);
 
         if (dateEntry[date] == undefined) {
@@ -128,6 +141,7 @@ function init() {
 // Init variables required
 var seconds = 0;
 var hostname = null;
+var hostsList = null;
 var date = null;
 var dateEntry = null;
 

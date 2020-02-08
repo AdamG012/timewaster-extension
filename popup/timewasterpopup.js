@@ -1,61 +1,14 @@
-function setItem() {
-          console.log("OK");
-}
-
-function onGot(item) {
-        console.log(item);
-}
-
-function onError(error) {
-        console.log(`Error: ${error}`);
-}
-
-function logTabs(tabs) {
-        return new URL(tabs[0].url).hostname;
-}
-
-function siteExists(websites, hostname) {
-        return !(Object.keys(websites).length == 0 || websites[hostname] == null);
-}
-
-function getDateFormat(d) {
-        return zeroPad(d.getDate(),2) + zeroPad(d.getMonth() + 1, 2) + zeroPad(d.getFullYear(), 4);
-
-}
+import {setItem, onGot, onError, logTabs, siteExists, getDateFormat, zeroPad, calculateTimeStandard} from "../libs/date/date_helper.js";
 
 /**
- * Pad zeros to number given the number of places
+ * Add timeout to the website
+ * Given the date will calculate the date at which the timeout will trigger
  */
-function zeroPad(num, places) {
-  var zero = places - num.toString().length + 1;
-  return Array(+(zero > 0 && zero)).join("0") + num;
-}
-
-/**
- * Calculate standard HH:MM:SS time given seconds
- */
-function calculateTimeStandard(seconds) {
-        var hours = parseInt(seconds / 3600);
-        if (hours >= 1) {
-                seconds -= hours * 3600;
-        }
-        var min = parseInt(seconds / 60);
-        if (min >= 1) {
-                seconds -= min * 60;
-        }
-
-        return zeroPad(hours, 2) + ":" + zeroPad(min, 2) + ":" + zeroPad(seconds, 2);
-}
-
-
 async function addTimeout() {
-
-
 
 	var currentDate = new Date();
 
 	var timeout = parseInt(document.getElementById("set-timeout").value);
-	var d = new Date(currentDate.getFullYear(),currentDate.getMonth(),currentDate.getDate(),currentDate.getHours(),timeout,currentDate.getSeconds(),0);
 
 	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
@@ -64,7 +17,6 @@ async function addTimeout() {
 	hostEntry[hostname]["timeout"] = timeout * 60;
 
 	await browser.storage.local.set(hostEntry);
-	
 	
 }
 
@@ -86,6 +38,10 @@ async function removeSite() {
 	location.reload();
 }
 
+/**
+ * Display the time on the popup
+ * Gets value of time from the datentry and converts to HHMMSS format
+ */
 async function dispTime() {
 	
 	var date = getDateFormat(new Date());
@@ -102,6 +58,9 @@ async function dispTime() {
 	}, 1000);
 }
 
+/**
+ * Simple button redirect to usage page
+ */
 async function viewStats() {
 	window.open("usage.html");
 

@@ -4,6 +4,9 @@
   <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="usage.css">
+    <script type="module" src="../libs/date/date_helper.js"></script>
+    <script src="../libs/chart/Chart.js"></script>
+    <script type="module" src="usage.js"></script>	
   </head>
 
 <body>
@@ -20,11 +23,9 @@
 
 	</div>
 
-	<canvas id="chart"></canvas>
-	<script src="../libs/chart/Chart.js"></script>
-
-	<script src="usage.js"></script>	
-
+	<div id="chart-container">
+		<canvas id="chart"></canvas>
+	</div>
 
 </body>
 
