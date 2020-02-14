@@ -26,7 +26,7 @@ async function dailyStats() {
 	var dateValue = document.getElementById('date-value').value;
 
 	const selectedDate = convertDate(document.getElementById('date-value').value);
-	var dateEntry = await browser.storage.local.get(selectedDate);
+	var dateEntry = (await browser.storage.local.get("dates"))["dates"];
 
 	if (dateEntry == null || Object.keys(dateEntry).length == 0) {
 		alert('Invalid Date');
@@ -112,9 +112,9 @@ function clearStatsDisplay() {
  */
 async function loadLabels(date) {
 
-	var dateEntry = await browser.storage.local.get(date);
+	var dateEntry = await browser.storage.local.get("dates");
 
-	var currentDate = dateEntry[date];
+	var currentDate = dateEntry["dates"][date];
 
 	var labelArray = [];
 
@@ -130,9 +130,9 @@ async function loadLabels(date) {
  * Helper function to load the content of each label
  */
 async function loadData(date) {
-        var dateEntry = await browser.storage.local.get(date);
+        var dateEntry = await browser.storage.local.get("dates");
 
-        var currentDate = dateEntry[date];
+        var currentDate = dateEntry["dates"][date];
 	
 	var dataArray = [];
 
@@ -196,7 +196,8 @@ async function loadChart(date) {
  */
 async function removeSite(site, dateEntry, date) {
 
-	delete dateEntry[date][site];
+	var dateEntry = await browser.storage.local.get("dates");
+	delete dateEntry["dates"][date][site];
 	await browser.storage.local.set(dateEntry);
 	document.getElementById(site + "-row").innerHTML = "";
 	clearChart();

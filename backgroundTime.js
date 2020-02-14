@@ -80,6 +80,53 @@ class DateEntry {
 }
 
 
+async function createDatesMap(hostname, date) {
+	dateEntry = await browser.storage.local.get("dates");
+
+        if (dateEntry == null || !dateEntry.hasOwnProperty("dates")) {
+                dateEntry = new Object();
+                dateEntry["dates"] = new Object();
+        }
+        
+        if (!dateEntry["dates"].hasOwnProperty(date)) {
+                dateEntry["dates"][date] = new Object();
+        }
+
+        if (!dateEntry["dates"][date].hasOwnProperty(hostname)) {
+                dateEntry["dates"][date][hostname] = 0;
+        }
+
+
+        await browser.storage.local.set(dateEntry);
+
+}
+
+
+async function createHostsMap(hostname, date) {
+
+	hostsList = await browser.storage.local.get("hosts");
+
+        if (hostsList == null || !hostsList.hasOwnProperty("hosts")) {
+                hostsList = new Object();
+                hostsList["hosts"] = new Object();
+        }
+
+        if (!hostsList["hosts"].hasOwnProperty(hostname)) {
+                hostsList["hosts"][hostname] = new Object();
+                hostsList["hosts"][hostname]["dateList"] = [];
+        }
+
+        if (!hostsList["hosts"][hostname]["dateList"].includes(date)) {
+                hostsList["hosts"][hostname]["dateList"].push(date);
+
+        }
+
+        await browser.storage.local.set(hostsList);
+
+
+}
+
+
 /**
  * Init tab 
  * initialise hostname, webistes map and seconds
@@ -90,43 +137,18 @@ async function initTab() {
 
         hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
-	hostsList = await browser.storage.local.get("hosts");
+	await createHostsMap(hostname, date);
 
-	if (hostsList == null || !hostsList.hasOwnProperty("hosts")) {
-		hostsList = new Object();
-		hostsList["hosts"] = new Object();
-	}
-
-	if (!hostsList["hosts"].hasOwnProperty(hostname)) {
-		hostsList["hosts"][hostname] = new Object();
-		hostsList["hosts"][hostname]["dateList"] = [];
-	}
-
-	if (!hostsList["hosts"][hostname]["dateList"].includes(date)) {
-		hostsList["hosts"][hostname]["dateList"].push(date);
-
-	}
-
-	await browser.storage.local.set(hostsList);
-
-	dateEntry = await browser.storage.local.get("dates");
-
-        if (!dateEntry.hasOwnProperty("dates")) {
-                dateEntry[date] = new Object();
-        }
-	if (!dateEntry[date].hasOwnProperty(hostname)) {
-                dateEntry[date][hostname] = 0;
-	}
-
-	await browser.storage.local.set(dateEntry);
+	await createDatesMap(hostname, date);
 }
+
 
 /**
  * Increments value of seconds and updates storage for browser
  */
 async function loopCounter() {
         await initTab();
-	dateEntry[date][hostname]++;
+	dateEntry["dates"][date][hostname]++;
         await browser.storage.local.set(dateEntry);
 }
 

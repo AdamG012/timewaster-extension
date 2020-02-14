@@ -15,7 +15,7 @@ export function logTabs(tabs) {
 }
 
 export function siteExists(websites, hostname) {
-        return !(Object.keys(websites).length == 0 || websites[hostname] == null);
+        return websites.hasOwnProperty(hostname);
 }
 
 export function getDateFormat(d) {

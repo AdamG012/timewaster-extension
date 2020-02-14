@@ -12,11 +12,11 @@ async function addTimeout() {
 
 	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
-	let hostsList = await browser.storage.local.get(hostname);
+	let hostsList = await browser.storage.local.get("hosts");
 
 	let dateTimeout = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds() + timeout * 60);
 
-	hostsList[hostname]["timeout"] = dateTimeout;
+	hostsList["hosts"][hostname]["timeout"] = dateTimeout;
 	
 	await browser.storage.local.set(hostsList);
 	
@@ -28,15 +28,22 @@ async function addTimeout() {
 async function removeSite() {
         var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
-        var websites = await browser.storage.local.get(hostname);
+	var websites = await browser.storage.local.get("hosts");
 
-	if (!siteExists(websites, hostname)) {
+	if (!siteExists(websites["hosts"], hostname)) {
 		return;
 	}
 
-        websites[hostname] = null;
+	delete websites["hosts"][hostname];
+
 	await browser.storage.local.set(websites);
-	await browser.storage.local.remove(hostname);
+
+	var dateEntry = await browser.storage.local.get("dates");
+
+	dateEntry["dates"][getDateFormat(new Date())][hostname] = 0;
+
+	await browser.storage.local.set(dateEntry);
+
 	location.reload();
 }
 
@@ -50,13 +57,13 @@ async function dispTime() {
 
 	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
-	var dateEntry = await browser.storage.local.get(date);
+	var dateEntry = await browser.storage.local.get("dates");
 
-	document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry[date][hostname]);
+	document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry["dates"][date][hostname]);
 
 	var timer = setInterval(async function() {
-		dateEntry = await browser.storage.local.get(date);
-		document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry[date][hostname]);
+		dateEntry = await browser.storage.local.get("dates");
+		document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry["dates"][date][hostname]);
 	}, 1000);
 }
 
@@ -70,4 +77,5 @@ async function viewStats() {
 
 document.getElementById("timeout-form").onsubmit = addTimeout;
 document.getElementById("view-stats").onclick = viewStats;
+document.getElementById("clear-site").onclick = removeSite;
 dispTime();
