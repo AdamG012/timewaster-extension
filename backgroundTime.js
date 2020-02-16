@@ -1,4 +1,3 @@
-
 // Helper functions for console
 function setItem() {
           console.log("OK");
@@ -118,10 +117,10 @@ async function createHostsMap(hostname, date) {
 
         if (!hostsList["hosts"][hostname]["dateList"].includes(date)) {
                 hostsList["hosts"][hostname]["dateList"].push(date);
+        	await browser.storage.local.set(hostsList);
 
-        }
+	}
 
-        await browser.storage.local.set(hostsList);
 
 
 }
@@ -147,9 +146,72 @@ async function initTab() {
  * Increments value of seconds and updates storage for browser
  */
 async function loopCounter() {
-        await initTab();
+        initTab();
 	dateEntry["dates"][date][hostname]++;
+	checkTimeout();
         await browser.storage.local.set(dateEntry);
+}
+
+async function checkTimeout() {
+	if (!hostsList["hosts"][hostname].hasOwnProperty("timeout")) {
+		return;
+	}
+
+	if (hostsList["hosts"][hostname]["timeout"] - dateEntry["dates"][date][hostname] <= 0) {
+		delete hostsList["hosts"][hostname]["timeout"]; 
+		await browser.storage.local.set(hostsList);
+		browser.windows.create({url: "src/timeout.html"});
+	}
+
+
+}
+
+/**
+ * Remove the site from the list
+ * Set values to 0 for time
+ */
+async function removeSite(host) {
+
+	if (!hostsList["hosts"].hasOwnProperty(host)) {
+		return;
+	}
+
+
+	if (!dateEntry["dates"][date].hasOwnProperty(host)) {
+		return;
+	}
+
+	dateEntry["dates"][date][host] = 0;
+
+	delete hostsList["hosts"][hostname]["timeout"];
+
+	await browser.storage.local.set(dateEntry);
+
+	await browser.storage.local.set(hostsList);
+	
+}
+
+/**
+ * Handle messages from the content scripts
+ * Given message 
+ * - getDates - returns dates
+ * - gethosts - return hsots
+ * - getall - returns both
+ * - removeSite - will remove site given a hostname
+ */
+function sendObjects(request, sender, sendResponse) {
+
+	if (request.message === 'getdates') {
+		sendResponse({dateEntry : dateEntry});
+	} else if (request.message === 'gethosts') {
+		sendResponse({hostsList : hostsList});
+	} else if (request.message === 'removeSite') {
+		removeSite(request.value);
+	} else if (request.message === 'getall') {
+		console.log("The request was " + request);
+		sendResponse({dateEntry : dateEntry, hostsList : hostsList});
+	}
+
 }
 
 /**
@@ -175,4 +237,6 @@ var date = null;
 var dateEntry = null;
 
 init();
+
+browser.runtime.onMessage.addListener(sendObjects);
 

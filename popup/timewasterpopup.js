@@ -1,25 +1,48 @@
 import {setItem, onGot, onError, logTabs, siteExists, getDateFormat, zeroPad, calculateTimeStandard} from "../libs/date/date_helper.js";
 
+
+function getResponse(response) {
+	console.log(response);
+}
+
+function handleError(e) {
+	console.log(`Error value: ${e}`);
+}
+
+function getStorage() {
+	let sending = browser.runtime.sendMessage("getall");
+	return sending;
+}
+
 /**
  * Add timeout to the website
  * Given the date will calculate the date at which the timeout will trigger
  */
-async function addTimeout() {
+async function setTimeout() {
 
-	var currentDate = new Date();
+	var currentDate = getDateFormat(new Date());
 
-	var timeout = parseInt(document.getElementById("set-timeout").value);
+	var timeout = document.getElementById("set-timeout").value;
 
-	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+        var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
-	let hostsList = await browser.storage.local.get("hosts");
+	if (timeout == null || timeout.length == 0 || isNaN(timeout) || timeout <= 0) {
+		alert("Invalid number");
+		return;
+	}
 
-	let dateTimeout = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds() + timeout * 60);
+	console.log(timeout);
 
-	hostsList["hosts"][hostname]["timeout"] = dateTimeout;
+	var receivedObject = await browser.runtime.sendMessage({ message : "getall"});
+
+	var dates = receivedObject["dateEntry"];
 	
-	await browser.storage.local.set(hostsList);
+	var hostsObjects = receivedObject["hostsList"];
+
+
+	hostsObjects["hosts"][hostname]["timeout"] = dates["dates"][currentDate][hostname] + timeout * 60;
 	
+	await browser.storage.local.set(hostsObjects);
 }
 
 /**
@@ -28,24 +51,11 @@ async function addTimeout() {
 async function removeSite() {
         var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
-	var websites = await browser.storage.local.get("hosts");
-
-	if (!siteExists(websites["hosts"], hostname)) {
-		return;
-	}
-
-	delete websites["hosts"][hostname];
-
-	await browser.storage.local.set(websites);
-
-	var dateEntry = await browser.storage.local.get("dates");
-
-	dateEntry["dates"][getDateFormat(new Date())][hostname] = 0;
-
-	await browser.storage.local.set(dateEntry);
+	await browser.runtime.sendMessage({ message : "removeSite", value : hostname});
 
 	location.reload();
 }
+
 
 /**
  * Display the time on the popup
@@ -59,13 +69,32 @@ async function dispTime() {
 
 	var dateEntry = await browser.storage.local.get("dates");
 
+
 	document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry["dates"][date][hostname]);
 
 	var timer = setInterval(async function() {
+		var hostsObjects = await browser.storage.local.get("hosts"); 
+
 		dateEntry = await browser.storage.local.get("dates");
+		dispTimeout(hostsObjects, hostname, dateEntry["dates"][date][hostname]);
 		document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry["dates"][date][hostname]);
 	}, 1000);
 }
+
+/**
+ * Display the timeout and stop if timesout
+ */
+function dispTimeout(hosts, hostname, seconds) {
+	
+	if (!hosts["hosts"][hostname].hasOwnProperty("timeout")) {
+		document.getElementById("timeout-display").innerHTML = "No timeout set";
+		return;	
+	}
+
+	document.getElementById("timeout-display").innerHTML = calculateTimeStandard(hosts["hosts"][hostname]["timeout"] - seconds);
+
+}
+
 
 /**
  * Simple button redirect to usage page
@@ -75,7 +104,7 @@ async function viewStats() {
 
 }
 
-document.getElementById("timeout-form").onsubmit = addTimeout;
+document.getElementById("set-timeout-button").onclick = setTimeout;
 document.getElementById("view-stats").onclick = viewStats;
 document.getElementById("clear-site").onclick = removeSite;
 dispTime();
