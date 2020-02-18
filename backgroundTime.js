@@ -11,11 +11,34 @@ function onError(error) {
         console.log(`Error: ${error}`);
 }
 
+function isLogged() {
+	if (!dateEntry["dates"][date].hasOwnProperty(date)) {
+		return false;
+	}
+
+	if (!hostsList["hosts"].hasOwnProperty(host)) {
+		return false;
+	}
+	
+	if (!dateEntry["dates"][date].hasOwnProperty(host)) {
+		return false;
+	}
+
+	return true;
+
+
+}
+
+
+
 /**
  * Log tabs determining the current tab
  * return the url hostname of tab
  */
 function logTabs(tabs) {
+	if (tabs.length == 0) {
+		return null;
+	}
         return new URL(tabs[0].url).hostname;
 }
 
@@ -136,6 +159,10 @@ async function initTab() {
 
         hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
+	if (hostname == null) {
+		return;
+	}
+
 	await createHostsMap(hostname, date);
 
 	await createDatesMap(hostname, date);
@@ -147,23 +174,47 @@ async function initTab() {
  */
 async function loopCounter() {
         initTab();
-	dateEntry["dates"][date][hostname]++;
-	checkTimeout();
-        await browser.storage.local.set(dateEntry);
+	if (hostname != null) {
+		dateEntry["dates"][date][hostname]++;
+		await checkTimeout();
+        	await browser.storage.local.set(dateEntry);
+	}
 }
 
+
+/**
+ * Check whether the tab has been timed out
+ * If so then close the tab alerting the user
+ * TODO provide option to reset timeout
+ */
 async function checkTimeout() {
 	if (!hostsList["hosts"][hostname].hasOwnProperty("timeout")) {
 		return;
 	}
 
 	if (hostsList["hosts"][hostname]["timeout"] - dateEntry["dates"][date][hostname] <= 0) {
-		delete hostsList["hosts"][hostname]["timeout"]; 
-		await browser.storage.local.set(hostsList);
-		browser.windows.create({url: "src/timeout.html"});
+		await updateCurrentTab();
+		
 	}
+}
 
 
+/**
+ * update the current tab to load the timeout html
+ */
+async function updateCurrentTab() {
+
+        var currentHostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+	var tabs = await browser.tabs.query({currentWindow: true});
+	console.log(tabs);
+	for (i = 0; i < tabs.length; i++) {
+		let tab = tabs[i];
+		console.log(tab);
+		if (tab.active && new URL(tab.url).hostname === currentHostname) {
+			await browser.tabs.update(tab.id, {active:true, url:"src/timeout.html"});
+			break;
+		}
+	}
 }
 
 /**
@@ -172,23 +223,42 @@ async function checkTimeout() {
  */
 async function removeSite(host) {
 
-	if (!hostsList["hosts"].hasOwnProperty(host)) {
+	if (!isLogged) {
 		return;
 	}
 
+	
 
-	if (!dateEntry["dates"][date].hasOwnProperty(host)) {
-		return;
-	}
 
 	dateEntry["dates"][date][host] = 0;
 
-	delete hostsList["hosts"][hostname]["timeout"];
+	if (hostsList["hosts"][host].hasOwnProperty("timeout")) {
+		delete hostsList["hosts"][host]["timeout"];
+		await browser.storage.local.set(hostsList);
+	}
 
 	await browser.storage.local.set(dateEntry);
 
-	await browser.storage.local.set(hostsList);
 	
+}
+
+
+/**
+ * Remove the timeout
+ */
+async function clearTimeout(host) {
+	
+	if (!isLogged) {
+		return;
+	}
+
+	if (!hostsList["hosts"][host].hasOwnProperty("timeout")) {
+		return;
+	}
+
+	delete hostsList["hosts"][host]["timeout"];
+
+	await browser.storage.local.set(hostsList);
 }
 
 /**
@@ -210,6 +280,8 @@ function sendObjects(request, sender, sendResponse) {
 	} else if (request.message === 'getall') {
 		console.log("The request was " + request);
 		sendResponse({dateEntry : dateEntry, hostsList : hostsList});
+	} else if (request.message === 'clearTimeout') {
+		clearTimeout(request.value);
 	}
 
 }

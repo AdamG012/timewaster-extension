@@ -56,6 +56,18 @@ async function removeSite() {
 	location.reload();
 }
 
+/**
+ * Clear the timeout
+ *
+ */
+async function clearTimeout() {
+        var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+
+	await browser.runtime.sendMessage({ message : "clearTimeout", value : hostname});
+
+	location.reload();
+}
+
 
 /**
  * Display the time on the popup
@@ -105,6 +117,7 @@ async function viewStats() {
 }
 
 document.getElementById("set-timeout-button").onclick = setTimeout;
+document.getElementById("clear-timeout").onclick = clearTimeout;
 document.getElementById("view-stats").onclick = viewStats;
 document.getElementById("clear-site").onclick = removeSite;
 dispTime();
