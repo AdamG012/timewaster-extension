@@ -148,6 +148,18 @@ async function createHostsMap(hostname, date) {
 
 }
 
+async function createTimeoutList() {
+	if (await browser.storage.local.get("timeoutList") != undefined) {
+		return;
+	}
+
+	var timeoutList = new Object();
+	timeoutList["timeout"] = new Object();
+
+	await browser.storage.local.set(timeoutList);
+
+}
+
 
 /**
  * Init tab 
@@ -192,10 +204,12 @@ async function checkTimeout() {
 		return;
 	}
 
-	if (hostsList["hosts"][hostname]["timeout"] - dateEntry["dates"][date][hostname] <= 0) {
+	if (hostsList["hosts"][hostname]["timeout"]-- <= 0) {
 		await updateCurrentTab();
-		
 	}
+
+	await browser.storage.local.set(hostsList);
+
 }
 
 
@@ -226,9 +240,6 @@ async function removeSite(host) {
 	if (!isLogged) {
 		return;
 	}
-
-	
-
 
 	dateEntry["dates"][date][host] = 0;
 

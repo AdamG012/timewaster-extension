@@ -39,10 +39,33 @@ async function setTimeout() {
 	
 	var hostsObjects = receivedObject["hostsList"];
 
-
-	hostsObjects["hosts"][hostname]["timeout"] = dates["dates"][currentDate][hostname] + timeout * 60;
+	hostsObjects["hosts"][hostname]["timeout"] = timeout * 60;
 	
 	await browser.storage.local.set(hostsObjects);
+
+	await addTimeout();
+}
+
+
+async function addTimeout() {
+	var currentDate = getDateFormat(new Date());
+
+	var timeout = document.getElementById("set-timeout").value;
+
+        var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+
+	if (timeout == null || timeout.length == 0 || isNaN(timeout) || timeout <= 0) {
+		alert("Invalid number");
+		return;
+	}
+
+	var timeoutList = await browser.storage.local.get("timeoutList");
+
+	timeoutList["timeoutList"][hostname] = timeout * 60;
+
+	await browser.storage.local.set("timeoutList");
+
+
 }
 
 /**
@@ -103,7 +126,7 @@ function dispTimeout(hosts, hostname, seconds) {
 		return;	
 	}
 
-	document.getElementById("timeout-display").innerHTML = calculateTimeStandard(hosts["hosts"][hostname]["timeout"] - seconds);
+	document.getElementById("timeout-display").innerHTML = calculateTimeStandard(hosts["hosts"][hostname]["timeout"]);
 
 }
 
