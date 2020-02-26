@@ -1,7 +1,7 @@
 {
   
   "manifest_version": 2,
-  "name": "Timewaster",
+  "name": "TimeWaster",
   "version": "2.2",
 
   "description": "Add sites to calculate the amount of time wasted.",
@@ -22,7 +22,7 @@
 
   "browser_action": {
     "default_icon": "icons/timewastericon.png",
-    "default_title": "Timewaster",
+    "default_title": "TimeWaster",
     "default_popup": "popup/timewaster.html"
   }
 

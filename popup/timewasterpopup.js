@@ -1,4 +1,4 @@
-import {setItem, onGot, onError, logTabs, siteExists, getDateFormat, zeroPad, calculateTimeStandard} from "../libs/date/date_helper.js";
+import {calculateTimeStandard, getDateFormat, logTabs, onError} from "../libs/date/date_helper.js";
 
 
 function getResponse(response) {
@@ -10,8 +10,7 @@ function handleError(e) {
 }
 
 function getStorage() {
-	let sending = browser.runtime.sendMessage("getall");
-	return sending;
+	return browser.runtime.sendMessage("getall");
 }
 
 /**
@@ -20,11 +19,11 @@ function getStorage() {
  */
 async function setTimeout() {
 
-	var currentDate = getDateFormat(new Date());
+	const currentDate = getDateFormat(new Date());
 
-	var timeout = document.getElementById("set-timeout").value;
+	const timeout = document.getElementById("set-timeout").value;
 
-        var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+	const hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
 	if (timeout == null || timeout.length == 0 || isNaN(timeout) || timeout <= 0) {
 		alert("Invalid number");
@@ -33,11 +32,11 @@ async function setTimeout() {
 
 	console.log(timeout);
 
-	var receivedObject = await browser.runtime.sendMessage({ message : "getall"});
+	const receivedObject = await browser.runtime.sendMessage({message: "getall"});
 
-	var dates = receivedObject["dateEntry"];
-	
-	var hostsObjects = receivedObject["hostsList"];
+	const dates = receivedObject["dateEntry"];
+
+	const hostsObjects = receivedObject["hostsList"];
 
 	hostsObjects["hosts"][hostname]["timeout"] = timeout * 60;
 	

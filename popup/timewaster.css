@@ -1,20 +1,40 @@
 .hidden {
-  display: none;
+    display: none;
+}
+
+.counter {
+    align: center;
+    text-align: center;
+    font-size: 22px;
+}
+
+.timewaster-body {
+    font-size: 14px;
+}
+
+.timeWaster-text {
+    color: black;
+    text-align: center;
 }
 
 .button {
-  margin: 3% auto;
-  padding: 4px;
-  text-align: center;
-  font-size: 1.5em;
-  cursor: pointer;
+    margin: 3% auto;
+    background-color: #4CAF00;
+    padding: 4px;
+    text-align: center;
+    display: inline-block;
+    font-size: 14px;
+    cursor: pointer;
 }
 
-.timewaster-counter {
-  align: center;
-  display: flex;
+.header {
+    text-align: center;
+    background: #2abd23;
+    color: white;
+    font-size: 14px;
+    align: center;
 }
 
 #set-timeout {
-  width: 4em
+    width: 4em;
 }

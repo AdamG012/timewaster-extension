@@ -1,32 +1,40 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="timewaster.css"/>
     <script type="module" src="../libs/date/date_helper.js"></script>
     <script type="module" src="timewasterpopup.js"></script>
+	  <title>TimeWaster</title>
   </head>
 
 <body>
-	<h1>Timewaster</h1>
+	<div class="header">
+		<h1 id="timewaster-heading">TimeWaster</h1>
+	</div>
 	
-	<p id="timewaster-bold">How much time have you spent on this website?</p><br/>
-	<p id="timewaster-counter"><br/></p>
-	
-		Timeout at (min):
-		<input type="number" id="set-timeout" min=1></input>
-		<input type="button" id="set-timeout-button" value="Set Timeout"></input>
-	<p id="timeout-display"></p>
+	<div class="timewaster-body">
+		<p class="timeWaster-text">How much time have you spent on this website?</p><br/>
 
-	<form>
-		<br/>
-		<input type="button" id="clear-site" value="Remove"></input>
-		<input type="button" id="clear-timeout" value="Clear Timeout"></input>
-		<br/>
-		<input type="button" id="view-stats" value="View Daily Usage"></input>
+		<p class="counter" id="timewaster-counter"></p>
 
-	</form>
+		<hr>
+
+		<label for="set-timeout">Timeout at (min) </label><input type="number" id="set-timeout" min=1/>
+		<input type="button" id="set-timeout-button" value="Set Timeout"/>
+
+		<p class="timeWaster-text" id="timeout-display"></p>
+
+		<form>
+			<br/>
+			<input type="button" id="clear-site" value="Remove"/>
+			<input type="button" id="clear-timeout" value="Clear Timeout"/>
+			<br/>
+			<input type="button" id="view-stats" value="View Daily Usage"/>
+
+		</form>
+	</div>
 
 </body>
 
