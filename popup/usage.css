@@ -60,5 +60,12 @@ canvas {
   margin-top: -10px;
   font-size: 24px;
   text-align: center;
+  margin-top: -34px;
+  font-family: "Courier New", courier, monospace;
+  font-size: 24px;
+  margin-left: -10px;
+  margin-right: -10px;
+  height: 80px;
+  background-color: brown;
 
 }

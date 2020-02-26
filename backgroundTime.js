@@ -136,16 +136,15 @@ async function createHostsMap(hostname, date) {
                 hostsList["hosts"][hostname]["dateList"] = [];
         }
 
-		if (!hostsList["hosts"][hostname].hasOwnProperty("counter")) {
-			hostsList["hosts"][hostname]["counter"] = 0;
-		}
+	if (!hostsList["hosts"][hostname].hasOwnProperty("counter")) {
+		hostsList["hosts"][hostname]["counter"] = 0;
+	}
 
         if (!hostsList["hosts"][hostname]["dateList"].includes(date)) {
         	hostsList["hosts"][hostname]["dateList"].push(date);
-        	await browser.storage.local.set(hostsList);
-
 	}
 
+        await browser.storage.local.set(hostsList);
 
 
 }
@@ -192,8 +191,8 @@ async function loopCounter() {
 		dateEntry["dates"][date][hostname]++;
 		hostsList["hosts"][hostname]["counter"]++;
 		await checkTimeout();
-		await browser.storage.local.set(dateEntry);
 		await browser.storage.local.set(hostsList);
+		await browser.storage.local.set(dateEntry);
 	}
 }
 

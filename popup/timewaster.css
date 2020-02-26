@@ -10,11 +10,13 @@
 
 .timewaster-body {
     font-size: 14px;
+    font-family: "Courier New", Courier, monospace;
 }
 
 .timeWaster-text {
     color: black;
     text-align: center;
+    font-family: "Courier New", Courier, monospace;
 }
 
 .button {
@@ -29,19 +31,23 @@
     font-size: 14px;
     cursor: pointer;
     float: left;
+    font-family: "Courier New", Courier, monospace;
 }
 
 .button:hover {
     background-color: yellow;
     opacity: 1;
+    font-family: "Courier New", Courier, monospace;
 }
 
 .header {
+    margin-top: -10px;
     text-align: center;
     background: #2abd23;
     color: white;
     font-size: 14px;
     align: center;
+    font-family: "Courier New", Courier, monospace;
 }
 
 #set-timeout {

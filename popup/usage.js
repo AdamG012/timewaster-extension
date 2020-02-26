@@ -72,7 +72,11 @@ function createTable(selectedDate, dateEntry) {
  */
 function showStats() {
 	const selected = document.getElementById("select-value").value;
-	if (selected === "daily") {
+	clearStatsDisplay();
+	clearChart();
+	if (selected === "all") {
+		loadAll();
+	} else if (selected === "daily") {
 		const date = new Date();
 		createDatePicker(date);
 	} else {
@@ -91,6 +95,59 @@ function clearChart() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	document.getElementById("chart-container").innerHTML = '&nbsp;';
 	document.getElementById("chart-container").innerHTML = '<canvas id="chart"></canvas>';
+}
+
+
+async function loadAll() {
+ 	let hostsList = await browser.storage.local.get("hosts");
+
+        let tableData = "<table class=\"websiteTable\" id=\"site-table\"><thead><tr><th>Website</th><th>Time</th></tr></thead>";
+
+        for (const website in hostsList["hosts"]) {
+                tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + hostsList["hosts"][website]["counter"] + "</td></tr>";
+
+        }
+
+        tableData += "</table>";
+
+        document.getElementById('stats-display').innerHTML += tableData;
+
+	loadChartHosts(hostsList);
+
+}
+
+
+async function loadChartHosts(hostsList) {
+	clearChart();
+        const ctx = document.getElementById("chart").getContext("2d");
+        const labels = [];
+        const dataValues = [];
+
+	for (let website in hostsList["hosts"]) {
+		labels.push(website);
+		dataValues.push(hostsList["hosts"][website]["counter"]);
+	}
+
+        const colourArray = loadColours(dataValues.length);
+
+        const data = {
+                labels: labels,
+                datasets: [{
+                        label: 'Daily Time(s)',
+                        backgroundColor: colourArray,
+                        hoverBackgroundColor: colourArray,
+                        borderColor: 'rgb(100, 20, 0)',
+                        data: dataValues
+                }]
+        };
+        const chart = new Chart(ctx, {
+                type: 'pie', //TODO change to option via dropdown
+
+                data: data,
+
+                options: {}
+        });
+
 }
 
 /**
