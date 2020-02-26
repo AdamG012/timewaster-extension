@@ -20,11 +20,9 @@ function isLogged() {
 		return false;
 	}
 	
-	if (!dateEntry["dates"][date].hasOwnProperty(host)) {
-		return false;
-	}
+	return dateEntry["dates"][date].hasOwnProperty(host);
 
-	return true;
+
 
 
 }
@@ -138,8 +136,12 @@ async function createHostsMap(hostname, date) {
                 hostsList["hosts"][hostname]["dateList"] = [];
         }
 
+		if (!hostsList["hosts"][hostname].hasOwnProperty("counter")) {
+			hostsList["hosts"][hostname]["counter"] = 0;
+		}
+
         if (!hostsList["hosts"][hostname]["dateList"].includes(date)) {
-                hostsList["hosts"][hostname]["dateList"].push(date);
+        	hostsList["hosts"][hostname]["dateList"].push(date);
         	await browser.storage.local.set(hostsList);
 
 	}
@@ -149,7 +151,7 @@ async function createHostsMap(hostname, date) {
 }
 
 async function createTimeoutList() {
-	if (await browser.storage.local.get("timeoutList") != undefined) {
+	if (await browser.storage.local.get("timeoutList") !== undefined) {
 		return;
 	}
 
@@ -185,11 +187,13 @@ async function initTab() {
  * Increments value of seconds and updates storage for browser
  */
 async function loopCounter() {
-        initTab();
+	initTab();
 	if (hostname != null) {
 		dateEntry["dates"][date][hostname]++;
+		hostsList["hosts"][hostname]["counter"]++;
 		await checkTimeout();
-        	await browser.storage.local.set(dateEntry);
+		await browser.storage.local.set(dateEntry);
+		await browser.storage.local.set(hostsList);
 	}
 }
 
