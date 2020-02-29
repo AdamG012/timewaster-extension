@@ -332,6 +332,23 @@ async function removeSite(site, date) {
 	await loadChart(date);
 }
 
+function checkCollapsible() {
+	let collapsibleItems = document.getElementsByClassName("collapsible");
+	for (var i = 0; i < collapsibleItems.length; i++) {
+		collapsibleItems[i].addEventListener("click", function() {
+			this.classList.toggle("active");
+			var content = this.nextElementSibling;
+			if (content.style.display === "block") {
+				content.style.display = "none";
+			} else {
+				content.style.display = "block";
+			}
+		});
+	}
+}
+
+checkCollapsible();
 showStats();
 document.getElementById("select-value").onchange = showStats;
+
 
