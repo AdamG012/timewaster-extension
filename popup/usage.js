@@ -1,4 +1,4 @@
-import {convertDate, getDateFormatUS} from '../libs/date/date_helper.js';
+import {convertDate, getDateFormatUS, getDateFormat} from '../libs/date/date_helper.js';
 
 
 /**
@@ -79,6 +79,9 @@ function showStats() {
 	} else if (selected === "daily") {
 		const date = new Date();
 		createDatePicker(date);
+	} else if (selected === "weekly") {
+		const date = new Date();
+		loadWeek(date);
 	} else {
 		clearStatsDisplay();
 		clearChart();
@@ -95,6 +98,80 @@ function clearChart() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	document.getElementById("chart-container").innerHTML = '&nbsp;';
 	document.getElementById("chart-container").innerHTML = '<canvas id="chart"></canvas>';
+}
+
+
+async function loadWeek(date) {
+
+        const dateEntry = (await browser.storage.local.get("dates"))["dates"];
+
+	let currentDate = dateEntry[getDateFormat(date)];
+
+        let tableData = "<table class=\"websiteTable\" id=\"site-table\"><thead><tr><th>Website</th><th>Time</th><th>Remove</th></tr></thead>";
+
+	let hosts = new Object();
+
+	for (var i = 0; i < 7; i++) {
+		for (const website in currentDate) {
+			if (hosts.hasOwnProperty(website)) {
+				hosts[website] += currentDate[website]; 
+			} else {
+				hosts[website] = currentDate[website];
+			}
+		}
+		date.setDate(date.getDate() - 1);
+		currentDate = dateEntry[getDateFormat(date)];
+	}
+
+	for (let website in hosts) {
+		tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + hosts[website] + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>";
+	}
+
+        tableData += "</table>";
+
+	for (const website in currentDate) {
+		
+		document.getElementById("remove-site-" + website).addEventListener('click', function(){removeSite(website, selectedDate)});
+	}
+
+	await loadWeekChart(hosts);
+
+        document.getElementById('stats-display').innerHTML += tableData;
+}
+
+
+async function loadWeekChart(hosts) {
+	clearChart();
+        const ctx = document.getElementById("chart").getContext("2d");
+        const labels = [];
+        const dataValues = [];
+
+	for (let website in hosts) {
+		labels.push(website);
+		dataValues.push(hosts[website]);
+	}
+
+        const colourArray = loadColours(dataValues.length);
+
+        const data = {
+                labels: labels,
+                datasets: [{
+                        label: 'Daily Time(s)',
+                        backgroundColor: colourArray,
+                        hoverBackgroundColor: colourArray,
+                        borderColor: 'rgb(100, 20, 0)',
+                        data: dataValues
+                }]
+        };
+        const chart = new Chart(ctx, {
+                type: 'pie', //TODO change to option via dropdown
+
+                data: data,
+
+                options: {}
+        });
+
+
 }
 
 
