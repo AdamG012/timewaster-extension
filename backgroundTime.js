@@ -116,9 +116,6 @@ async function createDatesMap(hostname, date) {
                 dateEntry["dates"][date][hostname] = 0;
         }
 
-
-        await browser.storage.local.set(dateEntry);
-
 }
 
 
@@ -144,9 +141,6 @@ async function createHostsMap(hostname, date) {
         	hostsList["hosts"][hostname]["dateList"].push(date);
 	}
 
-        await browser.storage.local.set(hostsList);
-
-
 }
 
 async function createTimeoutList() {
@@ -156,9 +150,6 @@ async function createTimeoutList() {
 
 	var timeoutList = new Object();
 	timeoutList["timeout"] = new Object();
-
-	await browser.storage.local.set(timeoutList);
-
 }
 
 
@@ -211,8 +202,6 @@ async function checkTimeout() {
 		await updateCurrentTab();
 	}
 
-	await browser.storage.local.set(hostsList);
-
 }
 
 
@@ -238,13 +227,13 @@ async function updateCurrentTab() {
  * Remove the site from the list
  * Set values to 0 for time
  */
-async function removeSite(host) {
+async function removeSite(host, currentDate) {
 
 	if (!isLogged) {
 		return;
 	}
 
-	dateEntry["dates"][date][host] = 0;
+	dateEntry["dates"][currentDate][host] = 0;
 
 	if (hostsList["hosts"][host].hasOwnProperty("timeout")) {
 		delete hostsList["hosts"][host]["timeout"];
@@ -290,7 +279,7 @@ function sendObjects(request, sender, sendResponse) {
 	} else if (request.message === 'gethosts') {
 		sendResponse({hostsList : hostsList});
 	} else if (request.message === 'removeSite') {
-		removeSite(request.value);
+		removeSite(request.value, request.date);
 	} else if (request.message === 'getall') {
 		console.log("The request was " + request);
 		sendResponse({dateEntry : dateEntry, hostsList : hostsList});

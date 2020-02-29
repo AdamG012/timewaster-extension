@@ -324,11 +324,11 @@ async function loadChart(date) {
  */
 async function removeSite(site, date) {
 
-	var dateEntry = await browser.storage.local.get("dates");
-	delete dateEntry["dates"][date][site];
-	await browser.storage.local.set(dateEntry);
+	await browser.runtime.sendMessage({ message : "removeSite", value : site, date : getDateFormat(new Date())});
+
+
 	document.getElementById(site + "-row").innerHTML = "";
-	clearChart();
+	await clearChart();
 	await loadChart(date);
 }
 

@@ -73,7 +73,7 @@ async function addTimeout() {
 async function removeSite() {
         var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
-	await browser.runtime.sendMessage({ message : "removeSite", value : hostname});
+	await browser.runtime.sendMessage({ message : "removeSite", value : hostname, date : getDateFormat(new Date())});
 
 	location.reload();
 }
