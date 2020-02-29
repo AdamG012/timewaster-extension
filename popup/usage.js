@@ -1,4 +1,4 @@
-import {convertDate, getDateFormatUS, getDateFormat} from '../libs/date/date_helper.js';
+import {convertDate, getDateFormatUS, getDateFormat, calculateTimeStandard} from '../libs/date/date_helper.js';
 
 
 /**
@@ -53,7 +53,7 @@ function createTable(selectedDate, dateEntry) {
 	let tableData = "<table class=\"websiteTable\" id=\"site-table\"><thead><tr><th>Website</th><th>Time</th><th>Remove</th></tr></thead>";
 
 	for (const website in currentDate) {
-		tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + currentDate[website] + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>";
+		tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + calculateTimeStandard(currentDate[website]) + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>";
 
 	}
 
@@ -124,7 +124,7 @@ async function loadWeek(date) {
 	}
 
 	for (let website in hosts) {
-		tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + hosts[website] + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>";
+		tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + calculateTimeStandard(hosts[website]) + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>";
 	}
 
         tableData += "</table>";
@@ -181,7 +181,7 @@ async function loadAll() {
         let tableData = "<table class=\"websiteTable\" id=\"site-table\"><thead><tr><th>Website</th><th>Time</th></tr></thead>";
 
         for (const website in hostsList["hosts"]) {
-                tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + hostsList["hosts"][website]["counter"] + "</td></tr>";
+                tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + calculateTimeStandard(hostsList["hosts"][website]["counter"]) + "</td></tr>";
 
         }
 
