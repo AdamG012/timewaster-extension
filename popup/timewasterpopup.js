@@ -58,11 +58,7 @@ async function addTimeout() {
 		return;
 	}
 
-	var timeoutList = await browser.storage.local.get("timeoutList");
-
-	timeoutList["timeoutList"][hostname] = timeout * 60;
-
-	await browser.storage.local.set("timeoutList");
+	await browser.runtime.sendMessage({ message : "setTimeout", value : hostname, time: timeout * 60});
 
 
 }
