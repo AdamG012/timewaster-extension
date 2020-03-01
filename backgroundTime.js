@@ -143,15 +143,6 @@ async function createHostsMap(hostname, date) {
 
 }
 
-async function createTimeoutList() {
-	if (await browser.storage.local.get("timeoutList") !== undefined) {
-		return;
-	}
-
-	var timeoutList = new Object();
-	timeoutList["timeout"] = new Object();
-}
-
 
 /**
  * Init tab 
@@ -181,9 +172,9 @@ async function loopCounter() {
 	if (hostname != null) {
 		dateEntry["dates"][date][hostname]++;
 		hostsList["hosts"][hostname]["counter"]++;
-		await checkTimeout();
 		await browser.storage.local.set(hostsList);
 		await browser.storage.local.set(dateEntry);
+		checkTimeout();
 	}
 }
 
@@ -194,13 +185,15 @@ async function loopCounter() {
  * TODO provide option to reset timeout
  */
 async function checkTimeout() {
-	if (!hostsList["hosts"][hostname].hasOwnProperty("timeout")) {
+	if (!timeout["timeout"].hasOwnProperty(hostname)) {
 		return;
 	}
 
-	if (hostsList["hosts"][hostname]["timeout"]-- <= 0) {
+	if (timeout["timeout"][hostname]-- <= 0) {
 		await updateCurrentTab();
 	}
+
+	await browser.storage.local.set(timeout);
 
 }
 
@@ -235,14 +228,32 @@ async function removeSite(host, currentDate) {
 
 	dateEntry["dates"][currentDate][host] = 0;
 
-	if (hostsList["hosts"][host].hasOwnProperty("timeout")) {
-		delete hostsList["hosts"][host]["timeout"];
-		await browser.storage.local.set(hostsList);
+	if (timeout["timeout"].hasOwnProperty(host)) {
+		delete timeout["timeout"][host];
 	}
 
+	delete dateEntry["dates"][currentDate][host];
+	delete hostsList["hosts"][host];
+	hostname = null;
+
+	await browser.storage.local.set(hostsList);
 	await browser.storage.local.set(dateEntry);
 
 	
+}
+
+async function addTimeout(host, time) {
+	if (timeout === undefined || timeout === null) {
+		timeout = new Object();
+	}
+
+	if (!timeout.hasOwnProperty("timeout")) {
+		timeout["timeout"] = new Object();
+	}
+
+	timeout["timeout"][host] = time;
+
+	await browser.storage.local.set(timeout);
 }
 
 
@@ -255,13 +266,9 @@ async function clearTimeout(host) {
 		return;
 	}
 
-	if (!hostsList["hosts"][host].hasOwnProperty("timeout")) {
-		return;
-	}
+	delete timeout["timeout"][host];
 
-	delete hostsList["hosts"][host]["timeout"];
-
-	await browser.storage.local.set(hostsList);
+	await browser.storage.local.set(timeout);
 }
 
 /**
@@ -283,6 +290,8 @@ function sendObjects(request, sender, sendResponse) {
 	} else if (request.message === 'getall') {
 		console.log("The request was " + request);
 		sendResponse({dateEntry : dateEntry, hostsList : hostsList});
+	} else if (request.message === 'setTimeout') {
+		addTimeout(request.value, request.time);
 	} else if (request.message === 'clearTimeout') {
 		clearTimeout(request.value);
 	}
@@ -299,6 +308,9 @@ function countTime() {
 
 function init() {
 
+	timeout = new Object();
+	timeout["timeout"] = new Object();
+	
         initTab();
         countTime();
 }
@@ -308,6 +320,7 @@ function init() {
 var seconds = 0;
 var hostname = null;
 var hostsList = null;
+var timeout = null;
 var date = null;
 var dateEntry = null;
 

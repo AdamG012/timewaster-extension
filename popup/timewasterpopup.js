@@ -49,7 +49,7 @@ async function setTimeout() {
 async function addTimeout() {
 	var currentDate = getDateFormat(new Date());
 
-	var timeout = document.getElementById("set-timeout").value;
+	var timeout = parseInt(document.getElementById("set-timeout").value);
 
         var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
@@ -103,25 +103,24 @@ async function dispTime() {
 	document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry["dates"][date][hostname]);
 
 	var timer = setInterval(async function() {
-		var hostsObjects = await browser.storage.local.get("hosts"); 
-
-		dateEntry = await browser.storage.local.get("dates");
-		dispTimeout(hostsObjects, hostname, dateEntry["dates"][date][hostname]);
-		document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry["dates"][date][hostname]);
+		dispTimeout(hostname);
+		document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry["dates"][date][hostname]++);
 	}, 1000);
 }
 
 /**
  * Display the timeout and stop if timesout
  */
-function dispTimeout(hosts, hostname, seconds) {
+async function dispTimeout(hostname) {
 	
-	if (!hosts["hosts"][hostname].hasOwnProperty("timeout")) {
+	var timeout = await browser.storage.local.get("timeout");
+
+	if (!timeout["timeout"].hasOwnProperty(hostname)) {
 		document.getElementById("timeout-display").innerHTML = "No timeout set";
 		return;	
 	}
 
-	document.getElementById("timeout-display").innerHTML = calculateTimeStandard(hosts["hosts"][hostname]["timeout"]);
+	document.getElementById("timeout-display").innerHTML = calculateTimeStandard(timeout["timeout"][hostname]);
 
 }
 
