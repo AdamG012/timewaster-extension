@@ -1,4 +1,4 @@
-import {convertDate, getDateFormatUS, getDateFormat, calculateTimeStandard} from '../libs/date/date_helper.js';
+import {convertDate, getDateFormatUS, getDateFormat, calculateTimeStandard} from '../../libs/date/date_helper.js';
 
 
 /**
@@ -101,6 +101,9 @@ function clearChart() {
 }
 
 
+/*
+ * Loads the weekly statistics for the table
+ */
 async function loadWeek(date) {
 
         const dateEntry = (await browser.storage.local.get("dates"))["dates"];
@@ -140,6 +143,10 @@ async function loadWeek(date) {
 }
 
 
+/**
+ * Loads the weekly statistics for the chart
+ * - takes in hosts which is the object containing hosts to days used
+ */
 async function loadWeekChart(hosts) {
 	clearChart();
         const ctx = document.getElementById("chart").getContext("2d");
@@ -175,6 +182,9 @@ async function loadWeekChart(hosts) {
 }
 
 
+/*
+ * Loads all the results across all periods of time
+ */
 async function loadAll() {
  	let hostsList = await browser.storage.local.get("hosts");
 
@@ -194,7 +204,11 @@ async function loadAll() {
 }
 
 
+/*
+ * Loads the daily chart hosts given a hosts list
+ */
 async function loadChartHosts(hostsList) {
+
 	clearChart();
         const ctx = document.getElementById("chart").getContext("2d");
         const labels = [];

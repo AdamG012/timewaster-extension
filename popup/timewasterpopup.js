@@ -129,7 +129,7 @@ async function dispTimeout(hostname) {
  * Simple button redirect to usage page
  */
 async function viewStats() {
-	window.open("usage.html");
+	window.open("../src/usage/usage.html");
 
 }
 

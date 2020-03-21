@@ -49,57 +49,19 @@ function zeroPad(num, places) {
 }
 
 
+/**
+ * Gets the format of the date in DDMMYYYY
+ */
 function getDateFormat(d) {
         return zeroPad(d.getDate(),2) + zeroPad(d.getMonth() + 1, 2) + zeroPad(d.getFullYear(), 4);
 
 }
 
 
-class WebsiteEntry {
-
-        constructor(name) {
-                this.name = name;
-                this.time = 0;
-        }
-
-	getTime() {
-		return this.time;
-	}
-
-	setTime(time) {
-		this.time = time;
-	}
-
-	incrementTime() {
-		this.time++;
-	}
-}
-
-class DateEntry {
-        constructor() {
-                this.websiteList = new Object();
-        }
-
-        siteExists(website) {
-                return this.websiteList[website] != null && this.websiteList[website] != undefined;
-        }
-
-        addWebsite(website) {
-                if (!this.siteExists(website)) {
-                        this.websiteList[website] = new WebsiteEntry(website);
-                }
-        }
-
-        getWebsite(website) {
-                if (this.siteExists(website)) {
-                        return this.websiteList[website];
-                }
-                return null;
-        }
-
-}
-
-
+/**
+ * Creates a map of dates to hosts to time
+ * Will load on every new host encountered
+ */
 async function createDatesMap(hostname, date) {
 	dateEntry = await browser.storage.local.get("dates");
 
@@ -119,6 +81,10 @@ async function createDatesMap(hostname, date) {
 }
 
 
+/**
+ * Creates a map of hosts to dates
+ * Will add new hosts 
+ */
 async function createHostsMap(hostname, date) {
 
 	hostsList = await browser.storage.local.get("hosts");
@@ -191,6 +157,7 @@ async function checkTimeout() {
 
 	if (timeout["timeout"][hostname]-- <= 0) {
 		await updateCurrentTab();
+		return;
 	}
 
 	await browser.storage.local.set(timeout);
@@ -210,7 +177,7 @@ async function updateCurrentTab() {
 		let tab = tabs[i];
 		console.log(tab);
 		if (tab.active && new URL(tab.url).hostname === currentHostname) {
-			await browser.tabs.update(tab.id, {active:true, url:"src/timeout.html"});
+			await browser.tabs.update(tab.id, {active:true, url:"src/timeout/timeout.html"});
 			break;
 		}
 	}
@@ -242,6 +209,10 @@ async function removeSite(host, currentDate) {
 	
 }
 
+
+/**
+ * Given message from popup will add timeout to the host
+ */
 async function addTimeout(host, time) {
 	if (timeout === undefined || timeout === null) {
 		timeout = new Object();
@@ -306,6 +277,11 @@ function countTime() {
         var timer = setInterval(loopCounter, 1000);
 }
 
+
+/**
+ * Basic initialisation
+ * Loads asynchronous calls to begin counting
+ */
 function init() {
 
 	timeout = new Object();
