@@ -1,39 +1,42 @@
 table.websiteTable {
-  border: 2px solid #A40808;
-  background-color: #EEE7DB;
-  width: 100%;
-  text-align: center;
+  border: 2px solid #000000;
+  background-color: #DBF9BD;
+  width: auto;
+  margin: 0 auto;
+  min-width: 60%;
+  text-align: center;	
+  table-layout: auto;
   border-collapse: collapse;
 }
 table.websiteTable td, table.websiteTable th {
-  border: 1px solid #AAAAAA;
+  border: 1px solid #000000;
   padding: 3px 2px;
 }
 table.websiteTable tbody td {
-  font-size: 13px;
+  font-size: 17px;
 }
 table.websiteTable tr:nth-child(even) {
-  background: #F5C8BF;
+  background: #B7EB84;
+  font-weight: bold;
 }
 table.websiteTable thead {
-  background: #A40808;
+  background: #000000;
 }
 table.websiteTable thead th {
-  font-size: 19px;
+  font-size: 28px;
   font-weight: bold;
   color: #FFFFFF;
   text-align: center;
-  border-left: 2px solid #A40808;
 }
-table.websiteTable thead th:first-child {
-  border-left: none;
+table.websiteTable td:nth-child(1) {
+  text-align: left;	
 }
 
 table.websiteTable tfoot {
   font-size: 13px;
   font-weight: bold;
   color: #FFFFFF;
-  background: #A40808;
+  background: #F5ECEA;
 }
 table.websiteTable tfoot td {
   font-size: 13px;
@@ -44,7 +47,7 @@ table.websiteTable tfoot .links {
 table.websiteTable tfoot .links a{
   display: inline-block;
   background: #FFFFFF;
-  color: #A40808;
+  color: #000000;
   padding: 2px 8px;
   border-radius: 5px;
 }
@@ -66,9 +69,11 @@ canvas {
   margin-left: -10px;
   margin-right: -10px;
   height: 80px;
-  background-color: brown;
+  background-color: #000000;
+  color: #FFF000;
 
 }
+
 
 .collapsible {
   cursor: pointer;
