@@ -118,15 +118,11 @@ async function initTab() {
 
 	date = getDateFormat(new Date());
 
-        hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+    hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
 	if (hostname == null) {
 		return;
 	}
-
-	await createHostsMap(hostname, date);
-
-	await createDatesMap(hostname, date);
 }
 
 
@@ -135,7 +131,12 @@ async function initTab() {
  */
 async function loopCounter() {
 	initTab();
-	if (hostname != null) {
+	if (hostname != null && !blacklisted['blacklisted'].hasOwnProperty(hostname)) {
+
+		await createHostsMap(hostname, date);
+
+		await createDatesMap(hostname, date);
+		
 		dateEntry["dates"][date][hostname]++;
 		hostsList["hosts"][hostname]["counter"]++;
 		await browser.storage.local.set(hostsList);
@@ -170,7 +171,7 @@ async function checkTimeout() {
  */
 async function updateCurrentTab() {
 
-        var currentHostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+    var currentHostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 	var tabs = await browser.tabs.query({currentWindow: true});
 	console.log(tabs);
 	for (i = 0; i < tabs.length; i++) {
@@ -188,13 +189,7 @@ async function updateCurrentTab() {
  * Set values to 0 for time
  */
 async function removeSite(host, currentDate) {
-
-	if (!isLogged) {
-		return;
-	}
-
-	dateEntry["dates"][currentDate][host] = 0;
-
+	
 	if (timeout["timeout"].hasOwnProperty(host)) {
 		delete timeout["timeout"][host];
 	}
@@ -202,6 +197,8 @@ async function removeSite(host, currentDate) {
 	delete dateEntry["dates"][currentDate][host];
 	delete hostsList["hosts"][host];
 	hostname = null;
+	clearTimeout(host);
+	toggleCount(host, false);
 
 	await browser.storage.local.set(hostsList);
 	await browser.storage.local.set(dateEntry);
@@ -252,21 +249,45 @@ async function clearTimeout(host) {
  */
 function sendObjects(request, sender, sendResponse) {
 
-	if (request.message === 'getdates') {
-		sendResponse({dateEntry : dateEntry});
-	} else if (request.message === 'gethosts') {
-		sendResponse({hostsList : hostsList});
-	} else if (request.message === 'removeSite') {
-		removeSite(request.value, request.date);
-	} else if (request.message === 'getall') {
-		console.log("The request was " + request);
-		sendResponse({dateEntry : dateEntry, hostsList : hostsList});
-	} else if (request.message === 'setTimeout') {
-		addTimeout(request.value, request.time);
-	} else if (request.message === 'clearTimeout') {
-		clearTimeout(request.value);
+
+	switch (request.message) {
+		case 'getdates':
+			sendResponse({dateEntry : dateEntry});
+			break;
+		case 'gethosts':
+			sendResponse({hostsList : hostsList});
+			break;
+		case  'removeSite':
+			removeSite(request.value, request.date);
+			break;
+		case 'getall':
+			console.log("The request was " + request);
+			sendResponse({dateEntry : dateEntry, hostsList : hostsList});
+			break;
+		case 'setTimeout':
+			addTimeout(request.value, request.time);
+			break;
+		case 'clearTimeout':
+			clearTimeout(request.value);
+			break;
+		case 'toggleCount':
+			toggleCount(request.value, request.isCount)
+			break;
+
+	}
+}
+
+/**
+ * Toggles on or off whether to count the website
+ */
+async function toggleCount(value, toggle) {
+	if (!toggle) {
+		blacklisted['blacklisted'][value] = toggle;
+	} else if (blacklisted['blacklisted'].hasOwnProperty(value)) {
+		delete blacklisted['blacklisted'][value];
 	}
 
+	await browser.storage.local.set(blacklisted);
 }
 
 /**
@@ -274,7 +295,7 @@ function sendObjects(request, sender, sendResponse) {
  */
 function countTime() {
 
-        var timer = setInterval(loopCounter, 1000);
+    var timer = setInterval(loopCounter, 1000);
 }
 
 
@@ -287,8 +308,8 @@ function init() {
 	timeout = new Object();
 	timeout["timeout"] = new Object();
 	
-        initTab();
-        countTime();
+    initTab();
+    countTime();
 }
 
 
@@ -299,6 +320,8 @@ var hostsList = null;
 var timeout = null;
 var date = null;
 var dateEntry = null;
+var blacklisted = new Object();
+blacklisted['blacklisted'] = new Object();
 
 init();
 

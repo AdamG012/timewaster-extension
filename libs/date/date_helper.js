@@ -36,14 +36,23 @@ export function convertDate(d) {
  * Pad zeros to number given the number of places
  */
 export function zeroPad(num, places) {
-  var zero = places - num.toString().length + 1;
-  return Array(+(zero > 0 && zero)).join("0") + num;
+        // Check if undefined
+        if (num == undefined || places == undefined) {
+                return;
+        }
+        var zero = places - num.toString().length + 1;
+        return Array(+(zero > 0 && zero)).join("0") + num;
 }
 
 /**
  * Calculate standard HH:MM:SS time given seconds
  */
 export function calculateTimeStandard(seconds) {
+
+        if (seconds == NaN || seconds == undefined) {
+                return "Not Counting";
+        }
+
         var hours = parseInt(seconds / 3600);
         if (hours >= 1) {
                 seconds -= hours * 3600;
