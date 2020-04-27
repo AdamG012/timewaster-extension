@@ -59,7 +59,7 @@ async function addTimeout() {
 
 	var timeout = parseInt(document.getElementById("set-timeout").value);
 
-    var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+    	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
 	if (timeout == null || timeout.length == 0 || isNaN(timeout) || timeout <= 0) {
 		alert("Invalid number");
@@ -81,6 +81,9 @@ async function toggleCount() {
 	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
 	await browser.runtime.sendMessage({ message : "toggleCount", value : hostname, isCount : toggle});
+
+	// Change the message to on or off
+	document.getElementById("on-off-switch").innerHTML = "TimeWaster is <b>" + (toggle ? "ON " : "OFF ") + "</b>for " + hostname;
 
 	changeCheckBoxToggle();
 
@@ -191,6 +194,7 @@ async function viewStats() {
 
 }
 
+toggleCount();
 document.getElementById("set-timeout-button").onclick = setTimeout;
 document.getElementById("clear-timeout").onclick = clearTimeout;
 document.getElementById("view-stats").onclick = viewStats;
