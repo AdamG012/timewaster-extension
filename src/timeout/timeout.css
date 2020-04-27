@@ -1,3 +1,16 @@
+.dark-theme {
+  background-color:#243447;
+  color: yellow;
+}
+
+.dark-theme h1 {
+  text-align: center;
+  margin-top: 0;
+  height: 50px;
+  border: 2px solid #F14321;
+  background-color: black;
+}
+
 table.websiteTable {
   border: 2px solid #A40808;
   background-color: #EEE7DB;

@@ -1,3 +1,10 @@
+/*
+ * Body Colour to dark
+ */
+body {
+	background-color:#243447;
+}
+
 table.websiteTable {
   border: 2px solid #000000;
   background-color: #DBF9BD;
@@ -74,6 +81,9 @@ canvas {
 
 }
 
+.dark-theme {
+  color: yellow;
+}
 
 .collapsible {
   cursor: pointer;
