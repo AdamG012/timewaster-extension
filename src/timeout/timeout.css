@@ -1,6 +1,6 @@
 .dark-theme {
   background-color:#243447;
-  color: yellow;
+  color: white;
 }
 
 .dark-theme h1 {
@@ -13,7 +13,7 @@
 
 table.websiteTable {
   border: 2px solid #A40808;
-  background-color: #EEE7DB;
+  background-color: #6B778D;
   width: 100%;
   text-align: center;
   border-collapse: collapse;
@@ -26,7 +26,7 @@ table.websiteTable tbody td {
   font-size: 13px;
 }
 table.websiteTable tr:nth-child(even) {
-  background: #F5C8BF;
+  background: #6B778D;
 }
 table.websiteTable thead {
   background: #A40808;
