@@ -6,10 +6,10 @@
     <link rel="stylesheet" type="text/css" href="timewaster.css"/>
     <script type="module" src="../libs/date/date_helper.js"></script>
     <script type="module" src="timewasterpopup.js"></script>
-	  <title>TimeWaster</title>
+    <title>TimeWaster</title>
   </head>
 
-<body>
+  <body class='dark-theme'>
 	<div class="header">
 		<h1 id="timewaster-heading">TimeWaster</h1>
 	</div>
@@ -21,22 +21,18 @@
 	</label>
 	
 	<div class="timewaster-body">
-		<p class="timeWaster-text">How much time have you spent on this website?</p>
-
 		<p class="counter" id="timewaster-counter"></p>
-
 		<hr>
 
 		<label for="set-timeout">Timeout at (min) </label><input type="number" id="set-timeout" min=1/>
-		<input type="button" id="set-timeout-button" value="Set Timeout"/>
+		<input class="timeout-button" type="button" id="set-timeout-button" value="Set Timeout"/>
 
 		<p class="timeWaster-text" id="timeout-display"></p>
-
 
 		<form>
 			<input type="button" class="button" id="clear-site" value="Remove"/>
 			<input type="button" class="button" id="clear-timeout" value="Clear Timeout"/>
-			<input type="button" class="button" id="view-stats" value="View Daily Usage"/>
+			<input type="button" class="button" id="view-stats" value="Daily Usage"/>
 
 		</form>
 	</div>

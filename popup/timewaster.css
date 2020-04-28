@@ -8,29 +8,42 @@
     font-size: 22px;
 }
 
+.dark-theme {
+  background-color:#243447;
+  color: #FF6768;
+  font-weight: bold;
+}
+
+.dark-theme h1 {
+  text-align: center;
+  border: 2px solid #F14321;
+  background-color: black;
+}
+
 .timewaster-body {
     font-size: 14px;
     font-family: "Courier New", Courier, monospace;
 }
 
 .timeWaster-text {
-    color: black;
     text-align: center;
+    font-size: 16px;
     font-family: "Courier New", Courier, monospace;
 }
 
 .button {
     margin: 0 auto;
     padding: 4px;
+    background-color: #0F4970;
+    color: white;
     opacity: 0.8;
     text-align: center;
     text-decoration: none;
     display: flex;
     justify-content: center;
-    border: 3px outset black;
-    border-color: black;
+    border: 0px black;
     height: 40px;
-    width: 200px;
+    width: 33.333333%;
     transition: 0.3s;
     font-size: 14px;
     cursor: pointer;
@@ -39,7 +52,31 @@
 }
 
 .button:hover {
-    background-color: green;
+    background-color: #FF6363;
+    opacity: 1;
+    font-family: "Courier New", Courier, monospace;
+}
+
+.timeout-button {
+    background-color: #0F4970;
+    color: white;
+    font-weight: bold;
+    opacity: 0.8;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    border: 0px black;
+    height: 40px;
+    transition: 0.3s;
+    font-size: 14px;
+    cursor: pointer;
+    float: right;
+    font-family: "Courier New", Courier, monospace;
+}
+
+.timeout-button:hover {
+    background-color: #FF6363;
     opacity: 1;
     font-family: "Courier New", Courier, monospace;
 }
@@ -63,6 +100,7 @@ Switch toggle for counting time wasted on the website
 */
 .switch {
     position: relative;
+    float: right;
     display: inline-block;
     width: 60px;
     height: 34px;
@@ -83,7 +121,7 @@ Switch toggle for counting time wasted on the website
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: #CCC;
     -webkit-transition: .4s;
     transition: .4s;
   }
@@ -101,11 +139,11 @@ Switch toggle for counting time wasted on the website
   }
   
   input:checked + .slider {
-    background-color: #2196F3;
+    background-color: #FF6768;
   }
   
   input:focus + .slider {
-    box-shadow: 0 0 1px #2196F3;
+    box-shadow: 0 0 1px #FF6768;
   }
   
   input:checked + .slider:before {
