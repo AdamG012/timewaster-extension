@@ -25,7 +25,7 @@
     font-family: "Courier New", Courier, monospace;
 }
 
-.timeWaster-text {
+.timewaster-text {
     text-align: center;
     font-size: 16px;
     font-family: "Courier New", Courier, monospace;
@@ -33,19 +33,20 @@
 
 .button {
     margin: 0 auto;
-    padding: 4px;
+    padding: 10px;
     background-color: #0F4970;
     color: white;
     opacity: 0.8;
     text-align: center;
     text-decoration: none;
-    display: flex;
+    display: block;
+    font-weight: bold;
     justify-content: center;
-    border: 0px black;
+    border: black solid 1px;
     height: 40px;
-    width: 33.333333%;
+    width: 33%;
     transition: 0.3s;
-    font-size: 14px;
+    font-size: 12px;
     cursor: pointer;
     float: left;
     font-family: "Courier New", Courier, monospace;
@@ -66,7 +67,7 @@
     text-decoration: none;
     display: flex;
     justify-content: center;
-    border: 0px black;
+    border: black solid 1px;
     height: 40px;
     transition: 0.3s;
     font-size: 14px;
