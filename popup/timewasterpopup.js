@@ -76,19 +76,32 @@ async function addTimeout() {
  */
 async function toggleCount() {
 	
+	// Check the value of the toggle
 	var toggle = document.getElementById('toggle-time-site').checked;
 
+	// Get the hostname
 	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
+	// Then send a message to the background script to toggle counting
 	await browser.runtime.sendMessage({ message : "toggleCount", value : hostname, isCount : toggle});
 
-	// Change the message to on or off
-	document.getElementById("on-off-switch").innerHTML = "TimeWaster is <b>" + (toggle ? "ON " : "OFF ") + "</b>for " + hostname;
+	// Get the title of the page
+	var title = await browser.tabs.query({currentWindow: true, active: true});
+	title = title[0].title;
 
+	// Change the message to on or off
+	document.getElementById("on-off-switch").innerHTML = "TimeWaster is <b>" + (toggle ? "ON " : "OFF ") + "</b>for " + title;
+
+	// Change the display of the check box
 	changeCheckBoxToggle();
 
 }
 
+
+/**
+ * Change the box toggle and set the checed value to false
+ *
+ */
 async function changeCheckBoxToggle() {
 	var toggle = await getToggle();
 
@@ -104,10 +117,14 @@ async function changeCheckBoxToggle() {
  * Remove site from the browser storage
  */
 async function removeSite() {
-    var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
+	// Get the hostname
+	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+
+	// Send a message to the background script to remove the site
 	await browser.runtime.sendMessage({ message : "removeSite", value : hostname, date : getDateFormat(new Date())});
 
+	// Reload the page 
 	location.reload();
 }
 
@@ -116,7 +133,7 @@ async function removeSite() {
  *
  */
 async function clearTimeout() {
-    var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+        var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
 	await browser.runtime.sendMessage({ message : "clearTimeout", value : hostname});
 
@@ -138,6 +155,7 @@ async function dispTime() {
 
 	document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry["dates"][date][hostname]);
 
+	dispTimeout(hostname);
 	var timer = setInterval(async function() {
 		var toggle = await getToggle();
 		if (toggle) {
