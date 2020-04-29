@@ -94,7 +94,6 @@ async function changeCheckBoxToggle() {
 
 	if (!toggle) {
 		document.getElementById('toggle-time-site').checked = false;
-		document.getElementById('toggle-time-site').removeAttribute('checked');
 	} else {
 		document.getElementById('toggle-time-site').checked = true;
 	}
