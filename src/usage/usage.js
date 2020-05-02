@@ -65,6 +65,7 @@ function createTable(selectedDate, dateEntry) {
 		
 		document.getElementById("remove-site-" + website).addEventListener('click', function(){removeSite(website, selectedDate)});
 	}
+
 }
 
 /**
@@ -74,20 +75,51 @@ function showStats() {
 	const selected = document.getElementById("select-value").value;
 	clearStatsDisplay();
 	clearChart();
+
+	// If the selected usage was all
 	if (selected === "all") {
 		loadAll();
+
+	// DAILY USAGE
 	} else if (selected === "daily") {
 		const date = new Date();
 		createDatePicker(date);
+
+	// WEEKLY USAGE
 	} else if (selected === "weekly") {
 		const date = new Date();
 		loadWeek(date);
+
+	// ELSE CLEAR THE DISPLAY OF BOTH
 	} else {
 		clearStatsDisplay();
 		clearChart();
 	}
+	
+	// Load the events on each of the table headers
+	addTableSortEvent();
+	
 }
 
+/*
+ * Add a sort listener to the table
+ */
+function addTableSortEvent() {
+
+	const table = document.querySelector('table'); //get the table to be sorted
+
+	// Check if the table is not null then add the table sort listener
+	if (table == null) {
+		return;
+	}
+
+	table.querySelectorAll('th') // get all the table header elements
+  		.forEach((element, columnNo)=>{ // add a click handler for each
+    		element.addEventListener('click', event => {
+        		sortTable(table, columnNo); //call a function which sorts the table by a given column number
+    			})
+		})
+}
 
 /**
  * Clear html displaying chart
@@ -361,6 +393,61 @@ function checkCollapsible() {
 	}
 }
 
+/*
+ * Will sort the table by alphabetical
+ */
+function sortTable(table, column) {
+
+	const tableB = document.querySelector('tbody');
+	const tableData = table2data(tableB);
+
+	// Sort the data
+	
+	tableData.sort((a, b) => {
+		if(a[column] > b[column]) {
+			return 1;
+		}
+		return -1;
+	});
+
+	data2table(tableB, tableData);
+
+}
+
+
+// https://stackoverflow.com/questions/10683712/html-table-sort
+function table2data(tableBody){
+  const tableData = []; // create the array that'll hold the data rows
+  tableBody.querySelectorAll('tr')
+    .forEach(row=>{  // for each table row...
+      const rowData = [];  // make an array for that row
+      row.querySelectorAll('td')  // for each cell in that row
+        .forEach(cell=>{
+          rowData.push(cell.innerText);  // add it to the row data
+        })
+      tableData.push(rowData);  // add the full row to the table data
+    });
+  return tableData;
+}
+
+
+// this function puts data into an html tbody element
+function data2table(tableBody, tableData){
+  tableBody.querySelectorAll('tr') // for each table row...
+    .forEach((row, i)=>{
+      const rowData = tableData[i]; // get the array for the row data
+      row.querySelectorAll('td')  // for each table cell ...
+        .forEach((cell, j)=>{
+          cell.innerText = rowData[j]; // put the appropriate array element into the cell
+        })
+      tableData.push(rowData);
+    });
+}
+
+
+// Set the default font
+Chart.defaults.global.defaultFontColor = 'white';
+Chart.defaults.global.defautlFontSize = 14;
 checkCollapsible();
 showStats();
 document.getElementById("select-value").onchange = showStats;

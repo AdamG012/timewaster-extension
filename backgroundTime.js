@@ -21,10 +21,6 @@ function isLogged() {
 	}
 	
 	return dateEntry["dates"][date].hasOwnProperty(host);
-
-
-
-
 }
 
 
