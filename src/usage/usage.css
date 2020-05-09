@@ -17,7 +17,7 @@ table.websiteTable td, table.websiteTable th {
   padding: 3px 2px;
 }
 table.websiteTable tbody td {
-  font-size: 13px;
+  font-size: 15px;
 }
 table.websiteTable tr:nth-child(even) {
   background: #6B778D;

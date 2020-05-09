@@ -5,10 +5,15 @@ import {convertDate, getDateFormatUS, getDateFormat, calculateTimeStandard} from
  * Simple function to load and create html that is meant with selecting date
  * Will need to revise a better way of adding html to pages
  */
-function createDatePicker(date) {
-	document.getElementById('stats-display').innerHTML = "<label for=\"start\">Enter date:</label><input type=\"date\" id=\"date-value\" name=\"date-select\" value=" + getDateFormatUS(date) + "></input><input type=\"button\" id=\"date-button\" value=\"Set date\"></input>";
-	dailyStats();
+function createDatePicker() {
+
+	// Create the date
+	var date = new Date();
+
+	// If the display has been loaded before
+	document.getElementById("stats-display").innerHTML = "<label for=\"start\">Enter date:</label><input type=\"date\" id=\"date-value\" name=\"date-select\" value=" + getDateFormatUS(date) + "></input><input type=\"button\" id=\"date-button\" value=\"Set date\"></input>";
 }
+
 
 /**
  * Calculate the daily usage stats
@@ -16,31 +21,45 @@ function createDatePicker(date) {
  * Iterate through keys and load names and time
  */
 async function dailyStats() {
-	
-	if (document.getElementById('site-table') != null) {
-		document.getElementById('site-table').remove();
-	}
 
-	const dateValue = document.getElementById('date-value').value;
+	// Clear the table if it exists
+	clearTable();
 
-	const selectedDate = convertDate(document.getElementById('date-value').value);
-	const dateEntry = (await browser.storage.local.get("dates"))["dates"];
+	// Get the value of the date, the converted form and the map of dates
+	const dateValue = document.getElementById("date-value").value;
+	const dateMap = (await browser.storage.local.get("dates"))["dates"];
 
-	if (dateEntry == null || Object.keys(dateEntry).length === 0) {
-		alert('Invalid Date');
-		document.getElementById('date-value').value = getDateFormatUS(new Date());
-		await dailyStats();
+	// If the map is null return
+	if (dateMap == null || Object.keys(dateMap).length === 0) {
 		return;
 	}
+
+	// Get the hosts list
+	var hosts = getTotalTime(dateMap, new Array(new Date(dateValue)));
 	
-	createTable(selectedDate, dateEntry);
+	// Load the table
+	loadTable(hosts);
 
 	document.getElementById('date-button').onclick = dailyStats;
-	await loadChart(selectedDate);
+
+	// Load the chart
+	loadChart(hosts);
 
 	// Set the value of the date
 	document.getElementById('date-value').value = dateValue;
 
+}
+
+
+/**
+ * Clear the table if it exists
+ */
+function clearTable() {
+
+	// Clear the existing table if there is one
+	if (document.getElementById("site-table") != null) {
+		document.getElementById("site-table").remove();
+	}
 }
 
 /**
@@ -82,22 +101,20 @@ function showStats() {
 
 	// DAILY USAGE
 	} else if (selected === "daily") {
-		const date = new Date();
-		createDatePicker(date);
+		createDatePicker();
+		dailyStats();
 
 	// WEEKLY USAGE
 	} else if (selected === "weekly") {
-		const date = new Date();
-		loadWeek(date);
+		createDatePicker();
+		loadWeek();
 
 	// ELSE CLEAR THE DISPLAY OF BOTH
 	} else {
 		clearStatsDisplay();
 		clearChart();
+		return;
 	}
-	
-	// Load the events on each of the table headers
-	addTableSortEvent();
 	
 }
 
@@ -121,6 +138,7 @@ function addTableSortEvent() {
 		})
 }
 
+
 /**
  * Clear html displaying chart
  */
@@ -133,45 +151,107 @@ function clearChart() {
 }
 
 
+/**
+ * Given the date map and the days
+ * Calculate the amount of time spent across those days
+ */
+function getTotalTime(dateMap, days) {
+
+	var hosts = new Object();
+
+	// Loop over the days
+	for (let i in days) {
+		// Get the date in the correct format
+		let date = getDateFormat(new Date(days[i]));
+
+		// Loop over the websites in that day
+		for (const website in dateMap[date]) {
+
+			var websiteName = website;
+			// if it is a firefox host then give it a name
+			if (website == "") {
+				websiteName = "Firefox Sites";
+			}
+
+			// If it has the website then add onto it
+			if (hosts.hasOwnProperty(website)) {
+				hosts[websiteName] += dateMap[date][website]; 
+			} else {
+				hosts[websiteName] = dateMap[date][website];
+			}
+		}
+	}
+
+	return hosts;
+
+}
+
+async function getDates() {
+
+        const dateMap = (await browser.storage.local.get("dates"))["dates"];
+
+}
+
 /*
  * Loads the weekly statistics for the table
  */
-async function loadWeek(date) {
+async function loadWeek() {
 
-        const dateEntry = (await browser.storage.local.get("dates"))["dates"];
+	// Clear the existing table
+	clearTable();
 
-	let currentDate = dateEntry[getDateFormat(date)];
+        const dateMap = (await browser.storage.local.get("dates"))["dates"];
 
-        let tableData = "<table class=\"websiteTable\" id=\"site-table\"><thead><tr><th>Website</th><th>Time</th><th>Remove</th></tr></thead>";
+	// Get the selected date
+	var rawDate = document.getElementById("date-value").value;
+	var date = new Date(rawDate);
 
-	let hosts = new Object();
+	// Create days to loop over
+	var days = new Array(date);
 
-	for (var i = 0; i < 7; i++) {
-		for (const website in currentDate) {
-			if (hosts.hasOwnProperty(website)) {
-				hosts[website] += currentDate[website]; 
-			} else {
-				hosts[website] = currentDate[website];
-			}
-		}
-		date.setDate(date.getDate() - 1);
-		currentDate = dateEntry[getDateFormat(date)];
+	// Loop over days adding to the list
+	for (let i = 1; i < 7; i++) {
+		// Get the previous day and add to list
+		days[i] = new Date(days[i - 1]);
+		days[i].setDate(date.getDate() - i);
 	}
 
+	// Get the hosts list mapped to time across the dates
+	var hosts = getTotalTime(dateMap, days);
+
+	
+	// Load the table and the chart
+	loadTable(hosts);
+	loadChart(hosts);
+
+	// Set the date button to link to call load week so it updates the table
+	document.getElementById('date-button').addEventListener("click", loadWeek);
+
+	// Set the date value to the selected value
+	document.getElementById("date-value").value = rawDate;
+}
+
+
+/**
+ * Given a map of hosts to times
+ * Load the table with columns of time and hostname
+ */
+function loadTable(hosts) {
+	// Get the table data
+        let tableData = "<table class=\"websiteTable\" id=\"site-table\"><thead><tr><th>Website</th><th>Time</th></tr></thead>";
+
+	// For every website inside the hosts lists add to table
 	for (let website in hosts) {
-		tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + calculateTimeStandard(hosts[website]) + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>";
+		tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + calculateTimeStandard(hosts[website]) + "</td></tr>";
 	}
 
+	// Append the ending tag
         tableData += "</table>";
 
-	for (const website in currentDate) {
-		
-		document.getElementById("remove-site-" + website).addEventListener('click', function(){removeSite(website, selectedDate)});
-	}
-
-	await loadWeekChart(hosts);
-
         document.getElementById('stats-display').innerHTML += tableData;
+
+	// Sort the table
+	addTableSortEvent();
 }
 
 
@@ -179,9 +259,14 @@ async function loadWeek(date) {
  * Loads the weekly statistics for the chart
  * - takes in hosts which is the object containing hosts to days used
  */
-async function loadWeekChart(hosts) {
+async function loadChart(hosts) {
+	// Clear existing chart
 	clearChart();
+
+	// Get the context of the chart
         const ctx = document.getElementById("chart").getContext("2d");
+	
+	// Load labels and data values
         const labels = [];
         const dataValues = [];
 
@@ -190,12 +275,14 @@ async function loadWeekChart(hosts) {
 		dataValues.push(hosts[website]);
 	}
 
+	// Given the length of the array of datavalues get unique colours
         const colourArray = loadColours(dataValues.length);
 
+	// Load this into the data
         const data = {
                 labels: labels,
                 datasets: [{
-                        label: 'Daily Time(s)',
+                        label: 'Usage Chart',
                         backgroundColor: colourArray,
                         hoverBackgroundColor: colourArray,
                         borderColor: 'rgb(100, 20, 0)',
@@ -218,60 +305,24 @@ async function loadWeekChart(hosts) {
  * Loads all the results across all periods of time
  */
 async function loadAll() {
- 	let hostsList = await browser.storage.local.get("hosts");
 
-        let tableData = "<table class=\"websiteTable\" id=\"site-table\"><thead><tr><th>Website</th><th>Time</th></tr></thead>";
+	// Get all the hosts 
+ 	let hostsList = (await browser.storage.local.get("hosts"))["hosts"];
 
-        for (const website in hostsList["hosts"]) {
-                tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + calculateTimeStandard(hostsList["hosts"][website]["counter"]) + "</td></tr>";
+	var hosts = new Object();
 
-        }
+	// Put all of the hosts into an array mapped to time
+	for (let website in hostsList) {
 
-        tableData += "</table>";
-
-        document.getElementById('stats-display').innerHTML += tableData;
-
-	loadChartHosts(hostsList);
-
-}
-
-
-/*
- * Loads the daily chart hosts given a hosts list
- */
-async function loadChartHosts(hostsList) {
-
-	clearChart();
-        const ctx = document.getElementById("chart").getContext("2d");
-        const labels = [];
-        const dataValues = [];
-
-	for (let website in hostsList["hosts"]) {
-		labels.push(website);
-		dataValues.push(hostsList["hosts"][website]["counter"]);
+		hosts[website] = hostsList[website]["counter"];
 	}
 
-        const colourArray = loadColours(dataValues.length);
-
-        const data = {
-                labels: labels,
-                datasets: [{
-                        label: 'Daily Time(s)',
-                        backgroundColor: colourArray,
-                        hoverBackgroundColor: colourArray,
-                        borderColor: 'rgb(100, 20, 0)',
-                        data: dataValues
-                }]
-        };
-        const chart = new Chart(ctx, {
-                type: 'pie', //TODO change to option via dropdown
-
-                data: data,
-
-                options: {}
-        });
+	// Load the table and the chart
+	loadTable(hosts);
+	loadChart(hosts);
 
 }
+
 
 /**
  * Clear html displaying stats
@@ -281,42 +332,6 @@ function clearStatsDisplay() {
 
 }
 
-/**
- * Helper function to load the labels for the chart
- */
-async function loadLabels(date) {
-
-	const dateEntry = await browser.storage.local.get("dates");
-
-	const currentDate = dateEntry["dates"][date];
-
-	const labelArray = [];
-
-	for (const label in currentDate) {
-		labelArray.push(label);
-	}
-
-	return labelArray;
-
-}
-
-/**
- * Helper function to load the content of each label
- */
-async function loadData(date) {
-	const dateEntry = await browser.storage.local.get("dates");
-
-	const currentDate = dateEntry["dates"][date];
-
-	const dataArray = [];
-
-	for (const website in currentDate) {
-		dataArray.push(currentDate[website]);	
-	}
-
-	return dataArray;
-
-}
 
 /**
  * Load random colours based on length of data
@@ -333,37 +348,6 @@ function loadColours(length) {
 
 }
 
-/**
- * Loading chart given calls to Loadlabels and loadData
- * Creates chart based on date
- */
-async function loadChart(date) {
-	clearChart();
-	const ctx = document.getElementById("chart").getContext("2d");
-	const labels = await loadLabels(date);
-	const dataValues = await loadData(date);
-	const colourArray = loadColours(dataValues.length);
-
-	const data = {
-		labels: labels,
-		datasets: [{
-			label: 'Daily Time(s)',
-			backgroundColor: colourArray,
-			hoverBackgroundColor: colourArray,
-			borderColor: 'rgb(100, 20, 0)',
-			data: dataValues
-		}]
-	};
-	const chart = new Chart(ctx, {
-		type: 'pie', //TODO change to option via dropdown
-
-		data: data,
-
-		options: {}
-	});
-
-
-}
 
 /**
  * Remove site from saved browser storage and update table
@@ -377,6 +361,7 @@ async function removeSite(site, date) {
 	await clearChart();
 	await loadChart(date);
 }
+
 
 function checkCollapsible() {
 	let collapsibleItems = document.getElementsByClassName("collapsible");
@@ -393,13 +378,32 @@ function checkCollapsible() {
 	}
 }
 
-/*
- * Will sort the table by alphabetical
+
+/**
+ * Sort the tables checking which way to sort
  */
 function sortTable(table, column) {
+	
+	// Change the value of clicked
+	sortClicked = !sortClicked;
+
+	// Sort based on whether the button has been clicked before
+	if (sortClicked) {
+		
+		sortTableAsc(table, column);
+	} else {
+
+		sortTableDesc(table, column);
+	}
+}
+
+/*
+ * Will sort the table by ascending order
+ */
+function sortTableAsc(table, column) {
 
 	const tableB = document.querySelector('tbody');
-	const tableData = table2data(tableB);
+	const tableData = table2data(tableB); 
 
 	// Sort the data
 	
@@ -414,20 +418,41 @@ function sortTable(table, column) {
 
 }
 
+/*
+ * Will sort the table by descending order
+ */
+function sortTableDesc(table, column) {
+
+	const tableB = document.querySelector('tbody');
+	const tableData = table2data(tableB); 
+
+	// Sort the data
+	
+	tableData.sort((a, b) => {
+		if(a[column] < b[column]) {
+			return 1;
+		}
+		return -1;
+	});
+
+	data2table(tableB, tableData);
+
+}
+
 
 // https://stackoverflow.com/questions/10683712/html-table-sort
 function table2data(tableBody){
-  const tableData = []; // create the array that'll hold the data rows
-  tableBody.querySelectorAll('tr')
-    .forEach(row=>{  // for each table row...
-      const rowData = [];  // make an array for that row
-      row.querySelectorAll('td')  // for each cell in that row
-        .forEach(cell=>{
-          rowData.push(cell.innerText);  // add it to the row data
-        })
-      tableData.push(rowData);  // add the full row to the table data
-    });
-  return tableData;
+	const tableData = []; // create the array that'll hold the data rows
+	tableBody.querySelectorAll('tr')
+		.forEach(row=>{  // for each table row...
+      		const rowData = [];  // make an array for that row
+      		row.querySelectorAll('td')  // for each cell in that row
+        	.forEach(cell=>{
+          		rowData.push(cell.innerText);  // add it to the row data
+        	})
+      		tableData.push(rowData);  // add the full row to the table data
+		});
+	return tableData;
 }
 
 
@@ -446,6 +471,7 @@ function data2table(tableBody, tableData){
 
 
 // Set the default font
+var sortClicked = false;
 Chart.defaults.global.defaultFontColor = 'white';
 Chart.defaults.global.defautlFontSize = 14;
 checkCollapsible();
