@@ -363,6 +363,9 @@ async function removeSite(site, date) {
 }
 
 
+/*
+ * Change whether the item should be collapsed or not.
+ */
 function checkCollapsible() {
 	let collapsibleItems = document.getElementsByClassName("collapsible");
 	for (var i = 0; i < collapsibleItems.length; i++) {
@@ -477,5 +480,3 @@ Chart.defaults.global.defautlFontSize = 14;
 checkCollapsible();
 showStats();
 document.getElementById("select-value").onchange = showStats;
-
-

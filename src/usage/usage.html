@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="usage.css">
-    <script type="module" src="../../libs/date/date_helper.js"></script>
-    <script src="../../libs/chart/Chart.js"></script>
-    <script type="module" src="usage.js"></script>
-	  <title>TimeWaster Usage</title>
-  </head>
+<head>
+    	<meta charset="utf-8">
+    	<link rel="stylesheet" href="usage.css">
+    	<script type="module" src="../../libs/date/date_helper.js"></script>
+    	<script src="../../libs/chart/Chart.js"></script>
+    	<script type="module" src="usage.js"></script>
+	<title>TimeWaster Usage</title>
+</head>
 
 <body>
 	<div class="header">
 		<h1>TimeWaster</h1>
 	</div>
 
-		<label class='dark-theme' for="select-value">View usage for </label><select id="select-value">
+	<label class='dark-theme' for="select-value">View usage for </label>
+	<select id="select-value">
 		<option value="">Please select</option>
 		<option value="all">All</option>
 		<option value="daily">Daily</option>
@@ -23,11 +24,12 @@
 	</select>
 
 	<button class="collapsible">Open table</button>
-	<div class="content" id="stats-display">
 
+	<div class="content" id="stats-display">
 	</div>
 
 	<button class="collapsible">Open chart</button>
+
 	<div class="content" id="chart-container">
 		<canvas id="chart"></canvas>
 	</div>
