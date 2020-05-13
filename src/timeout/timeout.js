@@ -18,15 +18,43 @@ function createTable(timeout) {
         }
 }
 
+
+/**
+ * Remove the timeout from the given website and reload the page
+ */
 async function removeTimeout(website) {
 	
 	await browser.runtime.sendMessage({ message: "clearTimeout", value: website});
 	location.reload();
 }
 
+
+/**
+ * Get the hosts list
+ */
 async function getHosts() {
 	
 	hostsList = await browser.storage.local.get("hosts");
 }
 
-var hostsList = browser.storage.local.get("timeout").then(createTable);
+
+/**
+ * Remove all timeouts
+ */
+async function removeAll() {
+
+	// Get the timeout map
+	var timeout = await browser.storage.local.get("timeout");
+
+	// For every host remove the timeout
+	for (const website in timeout["timeout"]) {
+		removeTimeout(website);
+	}
+
+	// Reload the page
+	location.reload();
+}
+
+
+browser.storage.local.get("timeout").then(createTable);
+document.getElementById("clear-all-button").addEventListener("click", removeAll);
