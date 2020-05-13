@@ -1,32 +1,63 @@
+/*
+ * Set the item given a promise
+ */
 export function setItem() {
           console.log("OK");
 }
 
+
+/*
+ * On retrieval of promise log the item
+ */
 export function onGot(item) {
         console.log(item);
 }
 
+
+/*
+ * On error, log the error of function
+ */
 export function onError(error) {
         console.log(`Error: ${error}`);
 }
 
+
+/*
+ * Determine the hostname given the set of tabs
+ */
 export function logTabs(tabs) {
         return new URL(tabs[0].url).hostname;
 }
 
+
+/*
+ * Check whether site exists given a object and a key
+ */
 export function siteExists(websites, hostname) {
         return websites.hasOwnProperty(hostname);
 }
 
+
+/**
+ * Get the date format in DDMMYYYY
+ */
 export function getDateFormat(d) {
         return zeroPad(d.getDate(),2) + zeroPad(d.getMonth() + 1, 2) + zeroPad(d.getFullYear(), 4);
 
 }
 
+
+/*
+ * Get the date format in YYYYMMDD
+ */
 export function getDateFormatUS(d) {
         return zeroPad(d.getFullYear(), 4) + "-" + zeroPad(d.getMonth() + 1, 2) + "-" + zeroPad(d.getDate(), 2);
 }
 
+
+/**
+ * Convert the date from a date input into a readable form
+ */
 export function convertDate(d) {
         var arr = d.split("-");
         return arr[2] + arr[1] + arr[0];

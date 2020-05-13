@@ -11,6 +11,10 @@ function onError(error) {
         console.log(`Error: ${error}`);
 }
 
+
+/**
+ * Check whether an item has been registered in either the hosts or dateEntry map
+ */
 function isLogged() {
 	if (!dateEntry["dates"][date].hasOwnProperty(date)) {
 		return false;
@@ -24,7 +28,6 @@ function isLogged() {
 }
 
 
-
 /**
  * Log tabs determining the current tab
  * return the url hostname of tab
@@ -35,6 +38,7 @@ function logTabs(tabs) {
 	}
         return new URL(tabs[0].url).hostname;
 }
+
 
 /**
  * Pad zeros to number given the number of places
@@ -114,7 +118,7 @@ async function initTab() {
 
 	date = getDateFormat(new Date());
 
-    hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+	hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
 	if (hostname == null) {
 		return;
