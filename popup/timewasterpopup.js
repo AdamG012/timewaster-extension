@@ -1,6 +1,5 @@
 import {calculateTimeStandard, getDateFormat, logTabs, onError} from "../libs/date/date_helper.js";
 
-
 function getResponse(response) {
 	console.log(response);
 }
@@ -9,9 +8,14 @@ function handleError(e) {
 	console.log(`Error value: ${e}`);
 }
 
+
+/**
+ * Get the storage of all hosts and dates
+ */
 function getStorage() {
 	return browser.runtime.sendMessage("getall");
 }
+
 
 /**
  * Add timeout to the website
@@ -28,15 +32,19 @@ async function setTimeout() {
 
 	const timeout = document.getElementById("set-timeout").value;
 
+	// Get the current hostname
 	const hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
+	// Check if the timeout is invalid
 	if (timeout == null || timeout.length == 0 || isNaN(timeout) || timeout <= 0) {
 		alert("Invalid number");
 		return;
 	}
 
+	// Log the timeout
 	console.log(timeout);
 
+	// Get all the objects required
 	const receivedObject = await browser.runtime.sendMessage({message: "getall"});
 
 	const dates = receivedObject["dateEntry"];

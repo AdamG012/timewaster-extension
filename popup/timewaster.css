@@ -20,6 +20,12 @@
   background-color: black;
 }
 
+.logo {
+ 
+  align: center;
+  margin-top: 5px;
+}
+
 .timewaster-body {
     font-size: 14px;
     font-family: "Courier New", Courier, monospace;
@@ -84,11 +90,9 @@
 
 .header {
     margin-top: -10px;
-    text-align: center;
     background: #2abd23;
     color: white;
-    font-size: 14px;
-    align: center;
+    font-size: 17px;
     font-family: "Courier New", Courier, monospace;
 }
 
