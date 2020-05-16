@@ -13,7 +13,7 @@ function handleError(e) {
  * Get the storage of all hosts and dates
  */
 function getStorage() {
-	return browser.runtime.sendMessage("getall");
+	return browser.runtime.sendMessage("getAll");
 }
 
 
@@ -45,7 +45,7 @@ async function setTimeout() {
 	console.log(timeout);
 
 	// Get all the objects required
-	const receivedObject = await browser.runtime.sendMessage({message: "getall"});
+	const receivedObject = await browser.runtime.sendMessage({message: "getAll"});
 
 	const dates = receivedObject["dateEntry"];
 
@@ -219,7 +219,6 @@ async function viewStats() {
 
 }
 
-toggleCount();
 document.getElementById("set-timeout-button").onclick = setTimeout;
 document.getElementById("clear-timeout").onclick = clearTimeout;
 document.getElementById("view-stats").onclick = viewStats;
