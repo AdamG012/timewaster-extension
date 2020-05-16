@@ -96,15 +96,15 @@ async function createHostsMap(hostname, date) {
 
         if (!hostsList["hosts"].hasOwnProperty(hostname)) {
                 hostsList["hosts"][hostname] = new Object();
-                hostsList["hosts"][hostname]["dateList"] = [];
+                hostsList["hosts"][hostname]["dateList"] = {};
         }
 
 	if (!hostsList["hosts"][hostname].hasOwnProperty("counter")) {
 		hostsList["hosts"][hostname]["counter"] = 0;
 	}
 
-        if (!hostsList["hosts"][hostname]["dateList"].includes(date)) {
-        	hostsList["hosts"][hostname]["dateList"].push(date);
+        if (!hostsList["hosts"][hostname]["dateList"].hasOwnProperty(date)) {
+        	hostsList["hosts"][hostname]["dateList"][date] = true;
 	}
 
 }
@@ -188,22 +188,55 @@ async function updateCurrentTab() {
  * Remove the site from the list
  * Set values to 0 for time
  */
-async function removeSite(host, currentDate) {
+async function removeSite(host, day) {
 	
-	if (timeout["timeout"].hasOwnProperty(host)) {
-		delete timeout["timeout"][host];
+	// Check if there is a day to remove
+	if (hostsList["hosts"][host]["dateList"].hasOwnProperty(day)) {
+		delete dateEntry["dates"][day][host];
 	}
 
-	delete dateEntry["dates"][currentDate][host];
-	delete hostsList["hosts"][host];
-	hostname = null;
-	clearTimeout(host);
+	// Check for if host is now empty
+	if (Object.keys(hostsList["hosts"][host]["dateList"]).length == 0) {
+		delete hostsList["hosts"][host];
+	}
+
+	// Clear the timeout if the day corresponds to the current date
+	if (date == day) {
+		clearTimeout(host);
+	}
+
+	// Toggle the site to not be counted
 	toggleCount(host, false);
 
+	// Set both of these in the local storage
+	await browser.storage.local.set(hostsList);
+	await browser.storage.local.set(dateEntry);
+}
+
+/**
+ * Remove all entries of this site
+ */
+async function removeAll(host) {
+
+	// For every single date in that host delete that date from the entries
+	for (const date in hostsList["hosts"][host]['dateList']) {
+		delete dateEntry["dates"][date][host];
+	}
+
+	// Remove the host from the list of hosts
+	delete hostsList["hosts"][host];
+
+	hostname = null;
+	// Clear the timeout
+	clearTimeout(host);
+
+	// Toggle the count
+	toggleCount(host, false);
+	
 	await browser.storage.local.set(hostsList);
 	await browser.storage.local.set(dateEntry);
 
-	
+
 }
 
 
@@ -243,26 +276,32 @@ async function clearTimeout(host) {
  * Handle messages from the content scripts
  * Given message 
  * - getDates - returns dates
- * - gethosts - return hsots
- * - getall - returns both
- * - removeSite - will remove site given a hostname
+ * - getHosts - return hsots
+ * - getAll - returns both
+ * - removeSite - will remove site given a hostname and a date
+ * - removeAll - will remove all instances of the site from hosts and dateEntry
+ * - setTimeout - set a timeout given a host and time
+ * - clearTimeout - will remove the timeout on the site
+ * - toggleCount - will toggle whether the count is counted or not
  */
 function sendObjects(request, sender, sendResponse) {
 
-
 	switch (request.message) {
-		case 'getdates':
+		case 'getDates':
 			sendResponse({dateEntry : dateEntry});
 			break;
-		case 'gethosts':
+		case 'getHosts':
 			sendResponse({hostsList : hostsList});
 			break;
 		case  'removeSite':
 			removeSite(request.value, request.date);
 			break;
-		case 'getall':
+		case 'getAll':
 			console.log("The request was " + request);
 			sendResponse({dateEntry : dateEntry, hostsList : hostsList});
+			break;
+		case 'removeAll':
+			removeAll(request.value);
 			break;
 		case 'setTimeout':
 			addTimeout(request.value, request.time);

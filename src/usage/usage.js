@@ -38,7 +38,7 @@ async function dailyStats() {
 	var hosts = getTotalTime(dateMap, new Array(new Date(dateValue)));
 	
 	// Load the table
-	loadTable(hosts);
+	loadTable(hosts, [dateValue]);
 
 	document.getElementById('date-button').onclick = dailyStats;
 
@@ -221,7 +221,7 @@ async function loadWeek() {
 
 	
 	// Load the table and the chart
-	loadTable(hosts);
+	loadTable(hosts, days);
 	loadChart(hosts);
 
 	// Set the date button to link to call load week so it updates the table
@@ -236,19 +236,33 @@ async function loadWeek() {
  * Given a map of hosts to times
  * Load the table with columns of time and hostname
  */
-function loadTable(hosts) {
+function loadTable(hosts, dates) {
 	// Get the table data
-        let tableData = "<table class=\"websiteTable\" id=\"site-table\"><thead><tr><th>Website</th><th>Time</th></tr></thead>";
+	let tableData = "<table class=\"websiteTable\" id=\"site-table\"><thead><tr><th>Website</th><th>Time</th><th>Remove</th></tr></thead>";
 
 	// For every website inside the hosts lists add to table
 	for (let website in hosts) {
-		tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + calculateTimeStandard(hosts[website]) + "</td></tr>";
+		tableData += "<tr id=" + website + "-row" + "><td><a href=" + ("https://" + website) + ">" + website + "</a></td><td>" + calculateTimeStandard(hosts[website]) + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>";
 	}
 
 	// Append the ending tag
         tableData += "</table>";
-
         document.getElementById('stats-display').innerHTML += tableData;
+
+	// Get the type of remove function to use
+	var removeFunction = null;
+	if (dates == null) {
+		removeFunction = removeAll;
+	} else {
+		removeFunction = removeSite;
+
+	}
+
+	// Add the remove function to the sites
+	for (const website in hosts) {
+		
+		document.getElementById("remove-site-" + website).addEventListener('click', function(){removeFunction(website, dates)});
+	}
 
 	// Sort the table
 	addTableSortEvent();
@@ -318,7 +332,7 @@ async function loadAll() {
 	}
 
 	// Load the table and the chart
-	loadTable(hosts);
+	loadTable(hosts, null);
 	loadChart(hosts);
 
 }
@@ -352,14 +366,27 @@ function loadColours(length) {
 /**
  * Remove site from saved browser storage and update table
  */
-async function removeSite(site, date) {
+async function removeSite(site, dates) {
 
-	await browser.runtime.sendMessage({ message : "removeSite", value : site, date : getDateFormat(new Date())});
-
+	// For every date in the list of dates remove the site from that date
+	for (var i in dates) {
+		await browser.runtime.sendMessage({ message : "removeSite", value : site, date : getDateFormat(new Date(dates[i]))});
+	}
 
 	document.getElementById(site + "-row").innerHTML = "";
 	await clearChart();
-	await loadChart(date);
+}
+
+
+/**
+ * Remove all entries of site
+ */
+async function removeAll(site) {
+
+	await browser.runtime.sendMessage({ message : "removeAll", value : site });
+
+	document.getElementById(site + "-row").innerHTML = "";
+	await clearChart();
 }
 
 
@@ -451,7 +478,7 @@ function table2data(tableBody){
       		const rowData = [];  // make an array for that row
       		row.querySelectorAll('td')  // for each cell in that row
         	.forEach(cell=>{
-          		rowData.push(cell.innerText);  // add it to the row data
+			rowData.push(cell.innerHTML);  // add it to the row data
         	})
       		tableData.push(rowData);  // add the full row to the table data
 		});
@@ -461,16 +488,17 @@ function table2data(tableBody){
 
 // this function puts data into an html tbody element
 function data2table(tableBody, tableData){
-  tableBody.querySelectorAll('tr') // for each table row...
-    .forEach((row, i)=>{
-      const rowData = tableData[i]; // get the array for the row data
-      row.querySelectorAll('td')  // for each table cell ...
-        .forEach((cell, j)=>{
-          cell.innerText = rowData[j]; // put the appropriate array element into the cell
-        })
-      tableData.push(rowData);
-    });
+	tableBody.querySelectorAll('tr') // for each table row...
+		.forEach((row, i)=>{
+			const rowData = tableData[i]; // get the array for the row data
+			row.querySelectorAll('td')  // for each table cell ...
+				.forEach((cell, j)=>{
+					cell.innerHTML = rowData[j]; // put the appropriate array element into the cell
+				})
+			tableData.push(rowData);
+		});
 }
+
 
 
 // Set the default font
