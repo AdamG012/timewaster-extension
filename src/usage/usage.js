@@ -87,6 +87,8 @@ function createTable(selectedDate, dateEntry) {
 
 }
 
+
+var state = null;
 /**
  * Gets value selected from dropdown and calls the appropriate function
  */
@@ -97,20 +99,24 @@ function showStats() {
 
 	// If the selected usage was all
 	if (selected === "all") {
+		state = "ALL";
 		loadAll();
 
 	// DAILY USAGE
 	} else if (selected === "daily") {
+		state = "DAILY";
 		createDatePicker();
 		dailyStats();
 
 	// WEEKLY USAGE
 	} else if (selected === "weekly") {
+		state = "WEEKLY";
 		createDatePicker();
 		loadWeek();
 
 	// ELSE CLEAR THE DISPLAY OF BOTH
 	} else {
+		state = null;
 		clearStatsDisplay();
 		clearChart();
 		return;
@@ -218,7 +224,6 @@ async function loadWeek() {
 
 	// Get the hosts list mapped to time across the dates
 	var hosts = getTotalTime(dateMap, days);
-
 	
 	// Load the table and the chart
 	loadTable(hosts, days);
@@ -367,6 +372,8 @@ function loadColours(length) {
  * Remove site from saved browser storage and update table
  */
 async function removeSite(site, dates) {
+	
+	// TODO check for firefox sites not working
 
 	// For every date in the list of dates remove the site from that date
 	for (var i in dates) {
@@ -382,6 +389,8 @@ async function removeSite(site, dates) {
  * Remove all entries of site
  */
 async function removeAll(site) {
+
+	console.log(site);
 
 	await browser.runtime.sendMessage({ message : "removeAll", value : site });
 
@@ -406,6 +415,15 @@ function checkCollapsible() {
 			}
 		});
 	}
+}
+
+
+/**
+ * Given whether daily weekly or all add sites to remove
+ */
+function addRemoveSites() {
+
+
 }
 
 
@@ -491,9 +509,17 @@ function data2table(tableBody, tableData){
 	tableBody.querySelectorAll('tr') // for each table row...
 		.forEach((row, i)=>{
 			const rowData = tableData[i]; // get the array for the row data
+			var websiteName = rowData[i];
+			var i = 0;
 			row.querySelectorAll('td')  // for each table cell ...
 				.forEach((cell, j)=>{
+					if (i == 2) {
+						const id = cell.firstChild.id;
+						const website = id.substring(12);
+						document.getElementById(id).addEventListener('click', function(){removeAll(website)});
+					}
 					cell.innerHTML = rowData[j]; // put the appropriate array element into the cell
+					i++;
 				})
 			tableData.push(rowData);
 		});
@@ -508,3 +534,4 @@ Chart.defaults.global.defautlFontSize = 14;
 checkCollapsible();
 showStats();
 document.getElementById("select-value").onchange = showStats;
+document.getElementById("refresh-button").onclick = showStats;
