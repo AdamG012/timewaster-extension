@@ -174,10 +174,7 @@ function getTotalTime(dateMap, days) {
 		for (const website in dateMap[date]) {
 
 			var websiteName = website;
-			// if it is a firefox host then give it a name
-			if (website == "") {
-				websiteName = "Firefox Sites";
-			}
+			// TODO if it is a firefox host then give it a name
 
 			// If it has the website then add onto it
 			if (hosts.hasOwnProperty(website)) {
@@ -380,8 +377,7 @@ async function removeSite(site, dates) {
 		await browser.runtime.sendMessage({ message : "removeSite", value : site, date : getDateFormat(new Date(dates[i]))});
 	}
 
-	document.getElementById(site + "-row").innerHTML = "";
-	await clearChart();
+	showStats();
 }
 
 
@@ -394,8 +390,8 @@ async function removeAll(site) {
 
 	await browser.runtime.sendMessage({ message : "removeAll", value : site });
 
-	document.getElementById(site + "-row").innerHTML = "";
-	await clearChart();
+	showStats();
+
 }
 
 
@@ -509,11 +505,11 @@ function data2table(tableBody, tableData){
 	tableBody.querySelectorAll('tr') // for each table row...
 		.forEach((row, i)=>{
 			const rowData = tableData[i]; // get the array for the row data
-			var websiteName = rowData[i];
+			const websiteName = rowData[i];
 			var i = 0;
 			row.querySelectorAll('td')  // for each table cell ...
 				.forEach((cell, j)=>{
-					if (i == 2) {
+					if (i % 3 == 2) {
 						const id = cell.firstChild.id;
 						const website = id.substring(12);
 						document.getElementById(id).addEventListener('click', function(){removeAll(website)});

@@ -10,20 +10,20 @@
 
 .dark-theme {
   background-color:#243447;
-  color: #FF6768;
+  color: #FFFFFF;
   font-weight: bold;
 }
 
 .dark-theme h1 {
+  margin: 10px 0;
   text-align: center;
-  border: 2px solid #F14321;
+  border: 2px solid #FF2E63;
   background-color: black;
 }
 
 .logo {
- 
-  align: center;
-  margin-top: 5px;
+  float: left;
+  margin-left: 1px;
 }
 
 .timewaster-body {
@@ -89,15 +89,14 @@
 }
 
 .header {
-    margin-top: -10px;
     background: #2abd23;
     color: white;
-    font-size: 17px;
+    font-size: 14px;
     font-family: "Courier New", Courier, monospace;
 }
 
 #set-timeout {
-    width: 4em;
+    width: 2em;
 }
 
 /*
@@ -107,8 +106,8 @@ Switch toggle for counting time wasted on the website
     position: relative;
     float: right;
     display: inline-block;
-    width: 60px;
-    height: 34px;
+    width: 50px;
+    height: 28px;
   }
   
   /* Hide default HTML checkbox */
@@ -134,9 +133,9 @@ Switch toggle for counting time wasted on the website
   .slider:before {
     position: absolute;
     content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
+    height: 20px;
+    width: 20px;
+    left: 1px;
     bottom: 4px;
     background-color: white;
     -webkit-transition: .4s;
@@ -144,7 +143,7 @@ Switch toggle for counting time wasted on the website
   }
   
   input:checked + .slider {
-    background-color: #FF6768;
+    background-color: #FF2E63;
   }
   
   input:focus + .slider {

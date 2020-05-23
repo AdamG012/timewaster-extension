@@ -16,6 +16,8 @@ table.websiteTable td, table.websiteTable th {
   border: 1px solid white;
   padding: 3px 2px;
 }
+
+
 table.websiteTable tbody td {
   font-size: 15px;
 }
@@ -108,4 +110,14 @@ canvas {
   display: none;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
+}
+
+.reload {
+  border-color: black;
+  padding: 1px;
+  font-weight: bold;
+  width: 40px;
+  background-color: #FFFFD2;
+  font-family: "Lucida Sans Unicode";
+  font-size: 30px;
 }

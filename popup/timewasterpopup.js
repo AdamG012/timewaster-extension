@@ -115,8 +115,10 @@ async function changeCheckBoxToggle() {
 
 	if (!toggle) {
 		document.getElementById('toggle-time-site').checked = false;
+		document.getElementById("on-off-switch").innerHTML = "TimeWaster is <b>OFF</b> for this site";
 	} else {
 		document.getElementById('toggle-time-site').checked = true;
+		document.getElementById("on-off-switch").innerHTML = "TimeWaster is <b>ON</b> for this site";
 	}
 }
 
@@ -141,10 +143,14 @@ async function removeSite() {
  *
  */
 async function clearTimeout() {
+
+	// Get the hostname
         var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 
+	// Send a message to background script
 	await browser.runtime.sendMessage({ message : "clearTimeout", value : hostname});
 
+	// Reload timeout popup
 	location.reload();
 }
 
@@ -155,24 +161,39 @@ async function clearTimeout() {
  */
 async function dispTime() {
 	
+	// get the date, (date may change, need to do this here)
 	var date = getDateFormat(new Date());
 
+	// Get the hostname
 	var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 	
+	// Get the map of dates
 	var dateEntry = await browser.storage.local.get("dates");
 
+	// Calculate before entering the timer to display instantly
 	document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry["dates"][date][hostname]);
 
+	// Same with this display timeout before having to wait a second
 	dispTimeout(hostname);
-	var timer = setInterval(async function() {
-		var toggle = await getToggle();
-		if (toggle) {
-			dateEntry = await browser.storage.local.get("dates");
-			hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
-			dispTimeout(hostname);
-			document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry["dates"][date][hostname]++);
-		}
-	}, 1000);
+	
+	// Setup the timer
+	var timer = setInterval(loadTimes, 1000);
+}
+
+
+/**
+ * The timer function that will update both the timeout and the timer
+ * every 1 second
+ */
+async function loadTimes() {
+	var toggle = await getToggle();
+	if (toggle) {
+		var date = getDateFormat(new Date());
+		var dateEntry = await browser.storage.local.get("dates");
+		var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
+		dispTimeout(hostname);
+		document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry["dates"][date][hostname]++);
+	}
 }
 
 /**
