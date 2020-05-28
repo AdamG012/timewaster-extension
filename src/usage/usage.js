@@ -62,32 +62,7 @@ function clearTable() {
 	}
 }
 
-/**
- * Responsible for loading a table with times given 
- * Also responsible for adding a button to remove each element from the table
- */
-function createTable(selectedDate, dateEntry) {
-	const currentDate = dateEntry[selectedDate];
-
-	let tableData = "<table class=\"websiteTable\" id=\"site-table\"><thead><tr><th>Website</th><th>Time</th><th>Remove</th></tr></thead>";
-
-	for (const website in currentDate) {
-		tableData += "<tr id=" + website + "-row" + "><td>" + website + "</td><td>" + calculateTimeStandard(currentDate[website]) + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>";
-
-	}
-
-	tableData += "</table>";
-
-	document.getElementById('stats-display').innerHTML += tableData;
-	
-	for (const website in currentDate) {
-		
-		document.getElementById("remove-site-" + website).addEventListener('click', function(){removeSite(website, selectedDate)});
-	}
-
-}
-
-
+// The state to hold whether it is weekly, daily, all or none
 var state = null;
 /**
  * Gets value selected from dropdown and calls the appropriate function
@@ -96,6 +71,7 @@ function showStats() {
 	const selected = document.getElementById("select-value").value;
 	clearStatsDisplay();
 	clearChart();
+	clearTable();
 
 	// If the selected usage was all
 	if (selected === "all") {
@@ -195,6 +171,20 @@ async function getDates() {
 
 }
 
+function loadWeeklyDates(date) {
+	// Create days to loop over
+	var days = new Array(date);
+
+	// Loop over days adding to the list
+	for (let i = 1; i < 7; i++) {
+		// Get the previous day and add to list
+		days[i] = new Date(days[i - 1]);
+		days[i].setDate(date.getDate() - i);
+	}
+
+	return days;
+}
+
 /*
  * Loads the weekly statistics for the table
  */
@@ -209,15 +199,7 @@ async function loadWeek() {
 	var rawDate = document.getElementById("date-value").value;
 	var date = new Date(rawDate);
 
-	// Create days to loop over
-	var days = new Array(date);
-
-	// Loop over days adding to the list
-	for (let i = 1; i < 7; i++) {
-		// Get the previous day and add to list
-		days[i] = new Date(days[i - 1]);
-		days[i].setDate(date.getDate() - i);
-	}
+	var days = loadWeeklyDates(date);
 
 	// Get the hosts list mapped to time across the dates
 	var hosts = getTotalTime(dateMap, days);
@@ -244,7 +226,7 @@ function loadTable(hosts, dates) {
 
 	// For every website inside the hosts lists add to table
 	for (let website in hosts) {
-		tableData += "<tr id=" + website + "-row" + "><td><a href=" + ("https://" + website) + ">" + website + "</a></td><td>" + calculateTimeStandard(hosts[website]) + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>";
+		tableData += "<tr id=" + website + "-row" + "><td><a href=" + ("https://" + website) + ">" + ((website == "") ? "Firefox Hosts" : website) + "</a></td><td>" + calculateTimeStandard(hosts[website]) + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>";
 	}
 
 	// Append the ending tag
@@ -369,15 +351,12 @@ function loadColours(length) {
  * Remove site from saved browser storage and update table
  */
 async function removeSite(site, dates) {
-	
-	// TODO check for firefox sites not working
 
 	// For every date in the list of dates remove the site from that date
-	for (var i in dates) {
+	for (const i in dates) {
 		await browser.runtime.sendMessage({ message : "removeSite", value : site, date : getDateFormat(new Date(dates[i]))});
 	}
-
-	showStats();
+	await showStats();
 }
 
 
@@ -386,11 +365,11 @@ async function removeSite(site, dates) {
  */
 async function removeAll(site) {
 
-	console.log(site);
+	clearTable();
 
 	await browser.runtime.sendMessage({ message : "removeAll", value : site });
 
-	showStats();
+	await showStats();
 
 }
 
@@ -411,15 +390,6 @@ function checkCollapsible() {
 			}
 		});
 	}
-}
-
-
-/**
- * Given whether daily weekly or all add sites to remove
- */
-function addRemoveSites() {
-
-
 }
 
 
@@ -447,7 +417,7 @@ function sortTable(table, column) {
 function sortTableAsc(table, column) {
 
 	const tableB = document.querySelector('tbody');
-	const tableData = table2data(tableB); 
+	const tableData = tableToData(tableB); 
 
 	// Sort the data
 	
@@ -458,7 +428,7 @@ function sortTableAsc(table, column) {
 		return -1;
 	});
 
-	data2table(tableB, tableData);
+	dataToTable(tableB, tableData);
 
 }
 
@@ -468,7 +438,7 @@ function sortTableAsc(table, column) {
 function sortTableDesc(table, column) {
 
 	const tableB = document.querySelector('tbody');
-	const tableData = table2data(tableB); 
+	const tableData = tableToData(tableB); 
 
 	// Sort the data
 	
@@ -479,42 +449,49 @@ function sortTableDesc(table, column) {
 		return -1;
 	});
 
-	data2table(tableB, tableData);
+	dataToTable(tableB, tableData);
 
 }
 
 
+//Function helps construct the table into an array which is used to sort
+// Logic and code retried from stack overflow
 // https://stackoverflow.com/questions/10683712/html-table-sort
-function table2data(tableBody){
-	const tableData = []; // create the array that'll hold the data rows
+function tableToData(tableBody){
+	// Create the array to hold the table data
+	const tableData = [];
 	tableBody.querySelectorAll('tr')
-		.forEach(row=>{  // for each table row...
-      		const rowData = [];  // make an array for that row
-      		row.querySelectorAll('td')  // for each cell in that row
-        	.forEach(cell=>{
-			rowData.push(cell.innerHTML);  // add it to the row data
-        	})
-      		tableData.push(rowData);  // add the full row to the table data
+		// For each row in the table
+		.forEach(row => {  
+			// Create an array for every row
+			const rowData = [];
+			// Loop through every cell and add the data to the row
+			row.querySelectorAll('td')
+			.forEach(cell => {
+				rowData.push(cell.innerHTML); 
+			})
+			tableData.push(rowData);
 		});
 	return tableData;
 }
 
 
 // this function puts data into an html tbody element
-function data2table(tableBody, tableData){
-	tableBody.querySelectorAll('tr') // for each table row...
+function dataToTable(tableBody, tableData){
+	// For each row in the table
+	tableBody.querySelectorAll('tr') 
 		.forEach((row, i)=>{
-			const rowData = tableData[i]; // get the array for the row data
-			const websiteName = rowData[i];
+			// Get the data in each table cell
+			const rowData = tableData[i];
+			// Count for every cell
 			var i = 0;
-			row.querySelectorAll('td')  // for each table cell ...
+			row.querySelectorAll('td') 
 				.forEach((cell, j)=>{
+					// Check whether this cell is for removing
 					if (i % 3 == 2) {
-						const id = cell.firstChild.id;
-						const website = id.substring(12);
-						document.getElementById(id).addEventListener('click', function(){removeAll(website)});
+						addEventHandlersToCells(cell);
 					}
-					cell.innerHTML = rowData[j]; // put the appropriate array element into the cell
+					cell.innerHTML = rowData[j];
 					i++;
 				})
 			tableData.push(rowData);
@@ -522,6 +499,39 @@ function data2table(tableBody, tableData){
 }
 
 
+/**
+ * This function given a cell will load the proper event handlers to remove that cell
+ * It will check the state and determine what to remove
+ */
+function addEventHandlersToCells(cell) {
+	// Just basic defensive checks
+	if (cell == null || cell.firstChild == undefined || cell.firstChild.id == undefined) {
+		return;
+	}
+
+	// Get the id of the row
+	const id = cell.firstChild.id;
+
+	// Check if invalid
+	if (id.length < 12) {
+		return;
+	}
+
+	// Get the website name
+	const website = id.substring(12);
+
+	// Check the specific state and add a remove function for each
+	if (state == "ALL") {
+		document.getElementById(id).addEventListener('click', function(){removeAll(website)});
+	} else if (state == "DAILY") {
+		const days = new Array();
+		days.push(new Date(document.getElementById("date-value").value));
+		document.getElementById(id).addEventListener('click', function(){removeSite(website, days)});
+	} else if (state == "WEEKLY") {
+		const days = loadWeeklyDates(new Date(document.getElementById("date-value").value));
+		document.getElementById(id).addEventListener('click', function(){removeSite(website, days)});
+	}
+}
 
 // Set the default font
 var sortClicked = false;

@@ -41,9 +41,6 @@ async function setTimeout() {
 		return;
 	}
 
-	// Log the timeout
-	console.log(timeout);
-
 	// Get all the objects required
 	const receivedObject = await browser.runtime.sendMessage({message: "getAll"});
 
@@ -192,6 +189,13 @@ async function loadTimes() {
 		var dateEntry = await browser.storage.local.get("dates");
 		var hostname = await browser.tabs.query({currentWindow: true, active: true}).then(logTabs, onError);
 		dispTimeout(hostname);
+
+		// For not displaying NaN
+		if (dateEntry["dates"][date][hostname] == undefined) {
+			document.getElementById("timewaster-counter").innerHTML = "Not Counting";
+			return;
+
+		}
 		document.getElementById("timewaster-counter").innerHTML = calculateTimeStandard(dateEntry["dates"][date][hostname]++);
 	}
 }

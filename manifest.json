@@ -2,12 +2,12 @@
   
   "manifest_version": 2,
   "name": "TimeWaster",
-  "version": "2.3",
+  "version": "2.4",
 
   "description": "Add sites to calculate the amount of time wasted.",
   
   "background": {
-    "scripts": ["backgroundTime.js"]
+    "scripts": ["background.js"]
   },
 
   "icons": {
