@@ -28,6 +28,7 @@ async function dailyStats() {
 	// Get the value of the date, the converted form and the map of dates
 	const dateValue = document.getElementById("date-value").value;
 	const dateMap = (await browser.storage.local.get("dates"))["dates"];
+	const hostMap = (await browser.storage.local.get("hosts"))["hosts"];
 
 	// If the map is null return
 	if (dateMap == null || Object.keys(dateMap).length === 0) {
@@ -38,12 +39,12 @@ async function dailyStats() {
 	var hosts = getTotalTime(dateMap, new Array(new Date(dateValue)));
 	
 	// Load the table
-	loadTable(hosts, [dateValue]);
+	await loadTable(hosts, [dateValue], hostMap);
 
 	document.getElementById('date-button').onclick = dailyStats;
 
 	// Load the chart
-	loadChart(hosts);
+	await loadChart(hosts);
 
 	// Set the value of the date
 	document.getElementById('date-value').value = dateValue;
@@ -112,11 +113,15 @@ function addTableSortEvent() {
 		return;
 	}
 
-	table.querySelectorAll('th') // get all the table header elements
-  		.forEach((element, columnNo)=>{ // add a click handler for each
-    		element.addEventListener('click', event => {
-        		sortTable(table, columnNo); //call a function which sorts the table by a given column number
-    			})
+	// For all the table headers
+	table.querySelectorAll('th')
+		// Add a click handler for each except remove
+  		.forEach((element, columnNo)=>{
+			if (columnNo != 2) {
+    				element.addEventListener('click', event => {
+        			sortTable(table, columnNo);
+				})
+    			}
 		})
 }
 
@@ -194,6 +199,7 @@ async function loadWeek() {
 	clearTable();
 
         const dateMap = (await browser.storage.local.get("dates"))["dates"];
+	const hostMap = (await browser.storage.local.get("hosts"))["hosts"];
 
 	// Get the selected date
 	var rawDate = document.getElementById("date-value").value;
@@ -205,7 +211,7 @@ async function loadWeek() {
 	var hosts = getTotalTime(dateMap, days);
 	
 	// Load the table and the chart
-	loadTable(hosts, days);
+	loadTable(hosts, days, hostMap);
 	loadChart(hosts);
 
 	// Set the date button to link to call load week so it updates the table
@@ -220,13 +226,13 @@ async function loadWeek() {
  * Given a map of hosts to times
  * Load the table with columns of time and hostname
  */
-function loadTable(hosts, dates) {
+function loadTable(hosts, dates, hostMap) {
 	// Get the table data
 	let tableData = "<table class=\"websiteTable\" id=\"site-table\"><thead><tr><th>Website</th><th>Time</th><th>Remove</th></tr></thead>";
 
 	// For every website inside the hosts lists add to table
 	for (let website in hosts) {
-		tableData += "<tr id=" + website + "-row" + "><td><a href=" + ("https://" + website) + ">" + ((website == "") ? "Firefox Hosts" : website) + "</a></td><td>" + calculateTimeStandard(hosts[website]) + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>";
+		tableData += "<tr id=" + website + "-row" + "><td><a href=" + hostMap[website]["url"] + ">" + ((website == "") ? "Firefox Hosts" : website) + "</a></td><td>" + calculateTimeStandard(hosts[website]) + "</td><td><input type=\"button\" id=\"remove-site-" + website  + "\" value=\"X\"></input></td></tr>";
 	}
 
 	// Append the ending tag
@@ -249,7 +255,7 @@ function loadTable(hosts, dates) {
 	}
 
 	// Sort the table
-	addTableSortEvent();
+ 	addTableSortEvent();
 }
 
 
@@ -305,19 +311,19 @@ async function loadChart(hosts) {
 async function loadAll() {
 
 	// Get all the hosts 
- 	let hostsList = (await browser.storage.local.get("hosts"))["hosts"];
+ 	let hostMap = (await browser.storage.local.get("hosts"))["hosts"];
 
 	var hosts = new Object();
 
 	// Put all of the hosts into an array mapped to time
-	for (let website in hostsList) {
+	for (let website in hostMap) {
 
-		hosts[website] = hostsList[website]["counter"];
+		hosts[website] = hostMap[website]["counter"];
 	}
 
 	// Load the table and the chart
-	loadTable(hosts, null);
-	loadChart(hosts);
+	await loadTable(hosts, null, hostMap);
+	await loadChart(hosts);
 
 }
 
@@ -482,17 +488,15 @@ function dataToTable(tableBody, tableData){
 	tableBody.querySelectorAll('tr') 
 		.forEach((row, i)=>{
 			// Get the data in each table cell
-			const rowData = tableData[i];
+			var rowData = tableData[i];
 			// Count for every cell
-			var i = 0;
 			row.querySelectorAll('td') 
 				.forEach((cell, j)=>{
+					cell.innerHTML = rowData[j];
 					// Check whether this cell is for removing
-					if (i % 3 == 2) {
+					if (j == 2) {
 						addEventHandlersToCells(cell);
 					}
-					cell.innerHTML = rowData[j];
-					i++;
 				})
 			tableData.push(rowData);
 		});
@@ -536,7 +540,7 @@ function addEventHandlersToCells(cell) {
 // Set the default font
 var sortClicked = false;
 Chart.defaults.global.defaultFontColor = 'white';
-Chart.defaults.global.defautlFontSize = 14;
+Chart.defaults.global.defautlFontSize = 18;
 checkCollapsible();
 showStats();
 document.getElementById("select-value").onchange = showStats;

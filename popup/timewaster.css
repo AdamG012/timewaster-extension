@@ -68,7 +68,7 @@
     background-color: #0F4970;
     color: white;
     font-weight: bold;
-    opacity: 0.8;
+    opacity: 1;
     text-align: center;
     text-decoration: none;
     display: flex;
@@ -76,7 +76,7 @@
     border: black solid 1px;
     height: 40px;
     transition: 0.3s;
-    font-size: 14px;
+    font-size: 12px;
     cursor: pointer;
     float: right;
     font-family: "Courier New", Courier, monospace;
@@ -96,7 +96,8 @@
 }
 
 #set-timeout {
-    width: 4em;
+    width: 3rem;
+    margin-top: 2px;
 }
 
 /*
@@ -164,3 +165,8 @@ Switch toggle for counting time wasted on the website
   .slider.round:before {
     border-radius: 50%;
   }
+
+#on-off-switch {
+  font-size: 15px;
+
+}

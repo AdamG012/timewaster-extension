@@ -96,6 +96,8 @@ async function createHostsMap(hostname, date) {
 
         if (!hostsList["hosts"].hasOwnProperty(hostname)) {
                 hostsList["hosts"][hostname] = new Object();
+		var tabs = await browser.tabs.query({currentWindow: true, active: true});
+		hostsList["hosts"][hostname]["url"] = new URL(tabs[0].url).origin;
                 hostsList["hosts"][hostname]["dateList"] = {};
         }
 
