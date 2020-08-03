@@ -17,7 +17,7 @@ With the help of Charts.js, it was easy to integrate elegant graphing into the a
 
 
 <p align="center">
-  <img src="images/usage-preview.png" width=700 height=400>
+  <img src="images/usage-preview.png" width=850 height=400>
 </p>
 
 
