@@ -1,6 +1,6 @@
 # timewaster-extension
 
-<img src="images/smallLogo.png">
+<img align="center" src="images/smallLogo.png" width=100 height=100>
 
 Timewaster is a browser extension dedicated to providing productivity benefits for users by recording usage across browsing sessions. 
 It is my quite simplistic endeavour into the world of web development or more specifically web extensions but has provided thorough insight and skills along the way.
