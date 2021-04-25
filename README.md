@@ -1,5 +1,7 @@
 # timewaster-extension
 
+*NOTE: This was used as a primer into Javascript and extension development, this probably has a lot of crappy design patterns within. I just jotted down additions whenever I felt like it, and as a result there may have been some late night hacky solutions... I apologise if the spaghetti is offensively messy*
+
 <p align="center">
   <img src="images/smallLogo.png" width=50 height=50>
 </p>
